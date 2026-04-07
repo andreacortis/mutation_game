@@ -107,15 +107,105 @@ with :math:`1 \leq p \leq q \leq r`. We denote this tree :math:`T_{p,q,r}`.
 
    \frac{1}{p+1} + \frac{1}{q+1} + \frac{1}{r+1} > 1
 
-*Proof sketch.* The characteristic polynomial of the adjacency matrix of
-:math:`T_{p,q,r}` can be expressed in terms of Chebyshev polynomials. Setting
-:math:`\lambda = 2` and analyzing the sign yields the condition above. The key
-identity is that a path of length :math:`\ell` contributes a factor related to
-:math:`U_\ell(\lambda/2)` (Chebyshev polynomial of the second kind), and the
-condition :math:`\rho < 2` reduces to a positivity condition on the sum of
-reciprocals of these Chebyshev values, which simplifies to
-:eq:`diophantine`. For a complete proof, see [Wild2003]_ or standard references
-on Coxeter groups. :math:`\square`
+*Proof.* The argument proceeds in three parts: we establish the characteristic
+polynomial recurrence for paths, factor the characteristic polynomial of
+:math:`T_{p,q,r}` at its branch point, then evaluate at :math:`\lambda = 2`.
+
+**Part A: Path polynomials are Chebyshev polynomials.**
+Let :math:`f_\ell(\lambda) = \det(\lambda I - A_{P_\ell})` be the
+characteristic polynomial of the path graph on :math:`\ell` vertices. By
+cofactor expansion along the first (or last) row:
+
+.. math::
+
+   f_0(\lambda) = 1, \quad
+   f_1(\lambda) = \lambda, \quad
+   f_\ell(\lambda) = \lambda \, f_{\ell-1}(\lambda) - f_{\ell-2}(\lambda)
+
+This is exactly the recurrence for the Chebyshev polynomials of the second
+kind :math:`U_\ell` under the substitution :math:`\lambda = 2\cos\theta`:
+
+.. math::
+
+   f_\ell(2\cos\theta)
+     = U_\ell(\cos\theta)
+     = \frac{\sin\bigl((\ell+1)\theta\bigr)}{\sin\theta}
+
+In particular, evaluating at :math:`\lambda = 2` (i.e. :math:`\theta \to 0`):
+
+.. math::
+
+   f_\ell(2) = \lim_{\theta \to 0}
+     \frac{\sin\bigl((\ell+1)\theta\bigr)}{\sin\theta}
+     = \ell + 1
+
+**Part B: Factoring the characteristic polynomial of** :math:`T_{p,q,r}`.
+The tree :math:`T_{p,q,r}` has a central vertex :math:`v` of degree 3,
+connected to three arms which are paths of lengths :math:`p`, :math:`q`,
+:math:`r`. Expanding :math:`\det(\lambda I - A)` along the row and column of
+:math:`v`, the three arms decouple:
+
+.. math::
+
+   P_{T_{p,q,r}}(\lambda)
+     = \lambda \cdot f_p \cdot f_q \cdot f_r
+       \;-\; f_{p-1} \cdot f_q \cdot f_r
+       \;-\; f_p \cdot f_{q-1} \cdot f_r
+       \;-\; f_p \cdot f_q \cdot f_{r-1}
+
+where all polynomials are evaluated at :math:`\lambda`. The three subtracted
+terms correspond to the three edges from :math:`v` into each arm. Dividing
+through by :math:`f_p \cdot f_q \cdot f_r`:
+
+.. math::
+
+   \frac{P_{T_{p,q,r}}(\lambda)}{f_p \cdot f_q \cdot f_r}
+     = \lambda
+       - \frac{f_{p-1}}{f_p}
+       - \frac{f_{q-1}}{f_q}
+       - \frac{f_{r-1}}{f_r}
+
+So :math:`\lambda` is an eigenvalue of :math:`T_{p,q,r}` if and only if:
+
+.. math::
+   :label: secular
+
+   \frac{f_{p-1}(\lambda)}{f_p(\lambda)}
+   + \frac{f_{q-1}(\lambda)}{f_q(\lambda)}
+   + \frac{f_{r-1}(\lambda)}{f_r(\lambda)}
+   = \lambda
+
+**Part C: Evaluating at** :math:`\lambda = 2`.
+Using :math:`f_\ell(2) = \ell + 1` from Part A, the secular equation
+:eq:`secular` at :math:`\lambda = 2` becomes:
+
+.. math::
+
+   \frac{p}{p+1} + \frac{q}{q+1} + \frac{r}{r+1} = 2
+
+Rewriting each fraction as :math:`1 - \frac{1}{\ell+1}`:
+
+.. math::
+
+   3 - \left(\frac{1}{p+1} + \frac{1}{q+1} + \frac{1}{r+1}\right) = 2
+
+which gives:
+
+.. math::
+
+   \frac{1}{p+1} + \frac{1}{q+1} + \frac{1}{r+1} = 1
+
+Therefore **λ = 2 is an eigenvalue if and only if the sum of reciprocals
+equals 1**. Since the path polynomials :math:`f_\ell` are positive and
+increasing for :math:`\lambda > 2\cos(\pi/(\ell+1))`, the spectral radius is
+strictly less than 2 precisely when :math:`P_{T_{p,q,r}}(2) > 0`, which by the
+factored form above holds if and only if:
+
+.. math::
+
+   \frac{1}{p+1} + \frac{1}{q+1} + \frac{1}{r+1} > 1
+
+:math:`\square`
 
 Step 6: Enumerating solutions
 ------------------------------
