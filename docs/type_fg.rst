@@ -5,6 +5,15 @@ The exceptional non-simply-laced Dynkin diagrams are :math:`F_4` and
 :math:`G_2`. Together with :math:`E_6`, :math:`E_7`, :math:`E_8`, they
 complete the list of exceptional finite-type root systems.
 
+.. note::
+
+   Unlike A, B, C, and D, which are infinite families parametrized by rank,
+   :math:`F_4` and :math:`G_2` are isolated singletons -- there is no
+   :math:`F_5`, :math:`G_3`, etc. The complete classification of finite-type
+   Dynkin diagrams consists of exactly four infinite families
+   (:math:`A_n, B_n, C_n, D_n`) and five exceptional singletons
+   (:math:`E_6, E_7, E_8, F_4, G_2`). No others exist.
+
 G2
 --
 
