@@ -12,6 +12,7 @@ mutations and visualizes the mutation graph.
 
    background
    classification_proof
+   singularities
    getting_started
    explorations
    api
