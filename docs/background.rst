@@ -2,19 +2,22 @@ Mathematical Background
 =======================
 
 The mutation game is a combinatorial process on graphs that naturally produces
-the root systems of Lie algebras. This section describes the mathematical
-setting.
+the root systems of Lie algebras. It was introduced by N. J. Wildberger
+[Wild2003]_ and later published in a generalized form in [Wild2020]_.
+This section describes the mathematical setting.
 
 The mutation game
 -----------------
 
-Consider a simple undirected graph *G* with *n* nodes, described by its
-adjacency matrix *A* (where :math:`A_{ij} = 1` if nodes *i* and *j* are
+The game is set on a network of cities on Mars, as described by Wildberger
+[Wild2003]_. Consider a simple undirected graph *G* with *n* nodes, described
+by its adjacency matrix *A* (where :math:`A_{ij} = 1` if nodes *i* and *j* are
 connected, and 0 otherwise).
 
 A **state** of the game is an integer vector :math:`v \in \mathbb{Z}^n`, where
 each component :math:`v_i` represents the population at node *i*. Populations
-can be positive ("Martians") or negative ("Anti-Martians").
+can be positive ("Martians") or negative ("Anti-Martians") -- Wildberger's
+original terminology.
 
 A **mutation at node** *k* transforms the state according to the rule:
 
@@ -209,10 +212,14 @@ Connection to Lie theory
 ------------------------
 
 The mutation game is a combinatorial realization of the **Weyl group** action
-on a root system. The mutation matrices :math:`M_k` are the **simple
-reflections** :math:`s_k` of the Weyl group *W(G)*, and the root system
-:math:`\Phi` produced by the game coincides with the root system of the
-corresponding simply-laced Lie algebra.
+on a root system [Wild2003]_ [Wild2020]_. The mutation matrices :math:`M_k`
+are the **simple reflections** :math:`s_k` of the Weyl group *W(G)*, and the
+root system :math:`\Phi` produced by the game coincides with the root system of
+the corresponding simply-laced Lie algebra. Wildberger showed that the graphs
+for which the mutation game produces a finite root system are precisely the
+Dynkin diagrams of finite-dimensional complex simple Lie algebras. A related
+purely combinatorial construction of the Lie algebras themselves for
+simply-laced diagrams is given in [Wild2003b]_.
 
 The simple reflection at node *k* acts on the weight lattice as:
 
@@ -234,3 +241,19 @@ For finite-type graphs, the mutation graph is a finite connected graph whose
 structure encodes the combinatorics of the Weyl group. The shortest path
 between two roots in this graph gives the minimal sequence of mutations (simple
 reflections) needed to transform one into the other.
+
+References
+----------
+
+.. [Wild2003] N. J. Wildberger, "The Mutation Game, Coxeter Graphs, and
+   Partially Ordered Multisets," preprint, UNSW, 2003.
+   https://web.maths.unsw.edu.au/~norman/papers/MutationGameCoxeterGraphs.pdf
+
+.. [Wild2020] N. J. Wildberger, "The Mutation Game, Coxeter--Dynkin Graphs,
+   and Generalized Root Systems," *Algebra Colloquium*, vol. 27, no. 1,
+   pp. 55--78, 2020.
+
+.. [Wild2003b] N. J. Wildberger, "A Combinatorial Construction for
+   Simply-Laced Lie Algebras," *Advances in Applied Mathematics*, vol. 30,
+   no. 1--2, pp. 385--396, 2003.
+   doi:`10.1016/S0196-8858(02)00541-9 <https://doi.org/10.1016/S0196-8858(02)00541-9>`_
