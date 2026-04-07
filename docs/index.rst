@@ -12,3 +12,11 @@ visualizes the mutation graph.
    background
    getting_started
    api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Explorations
+
+   type_a
+   type_d
+   type_e
