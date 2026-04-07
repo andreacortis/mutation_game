@@ -12,20 +12,5 @@ mutations and visualizes the mutation graph.
 
    background
    getting_started
+   explorations
    api
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Simply-Laced (Simple Graphs)
-
-   type_a
-   type_d
-   type_e
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Non-Simply-Laced (Directed Multigraphs)
-
-   type_b
-   type_c
-   type_fg
