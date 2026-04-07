@@ -1,6 +1,6 @@
 [project]
 name = "mutation-game"
-version = "0.1.1"
+version = "0.1.2"
 description = "Root system explorer via the combinatorial mutation game on graphs"
 readme = "README.md"
 license = "MIT"
@@ -43,6 +43,7 @@ dev = [
     "pytest>=9.0.2",
     "sphinx>=9.0.4",
     "sphinx-rtd-theme>=3.1.0",
+    "yt-dlp>=2026.3.17",
 ]
 
 [tool.pytest.ini_options]

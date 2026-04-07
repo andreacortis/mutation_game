@@ -3,4 +3,4 @@
 from mutation_game.mutation import MutationGame
 
 __all__ = ["MutationGame"]
-__version__ = "0.1.1"
+__version__ = "0.1.2"
