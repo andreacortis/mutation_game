@@ -5,7 +5,6 @@ author = ""
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "myst_parser",
 ]
 
 html_theme = "sphinx_rtd_theme"
