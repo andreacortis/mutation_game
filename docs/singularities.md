@@ -1,0 +1,235 @@
+# From Singularities to Dynkin Diagrams: Arnold's ADE Classification
+
+## 1. The Setup: Critical Points of Smooth Functions
+
+Consider a smooth function $f: \mathbb{R}^n \to \mathbb{R}$. A point $x_0$ is a **critical point** if all partial derivatives vanish:
+
+$$\nabla f(x_0) = 0$$
+
+The critical point is **non-degenerate** if the Hessian matrix
+
+$$H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}(x_0)$$
+
+has full rank ($\det H \neq 0$). By the **Morse Lemma**, every non-degenerate critical point can be brought to the normal form
+
+$$f(x) = \pm x_1^2 \pm x_2^2 \pm \cdots \pm x_n^2$$
+
+by a smooth change of coordinates. Non-degenerate critical points are completely classified by a single integer (the index = number of minus signs), and they are **stable**: small perturbations of $f$ don't change the local picture.
+
+The interesting story begins with **degenerate** critical points, where $\det H = 0$.
+
+## 2. Equivalence of Singularities
+
+Two function germs $f$ and $g$ (functions defined near the origin with $f(0) = g(0) = 0$, $\nabla f(0) = \nabla g(0) = 0$) are **right-equivalent** if there exists a smooth change of coordinates $\phi$ near 0 such that:
+
+$$g(x) = f(\phi(x))$$
+
+This is the natural notion of "same singularity" — if you can deform the domain to turn one function into the other, they have the same type.
+
+**Example.** $f(x,y) = x^3 + y^2$ and $g(x,y) = x^3 + 2y^2$ are right-equivalent (via $\phi(x,y) = (x, y/\sqrt{2})$), but $f(x,y) = x^3 + y^2$ and $h(x,y) = x^4 + y^2$ are not.
+
+## 3. Simple Singularities
+
+A singularity is **simple** if a sufficiently small neighborhood of $f$ in function space contains only finitely many equivalence classes of singularities.
+
+Intuitively: if you perturb $f$ slightly, the singularity may split or change type, but only finitely many different types can appear. This is the strongest possible finiteness condition on a degenerate critical point.
+
+**Arnold's Theorem (1972).** *The simple singularities of functions $f: \mathbb{R}^n \to \mathbb{R}$ (up to right-equivalence and addition of non-degenerate quadratic terms) are exactly:*
+
+| Type | Normal form | Milnor number $\mu$ |
+|------|-----------|---------------------|
+| $A_n$ ($n \geq 1$) | $x^{n+1}$ | $n$ |
+| $D_n$ ($n \geq 4$) | $x^2 y + y^{n-1}$ | $n$ |
+| $E_6$ | $x^3 + y^4$ | $6$ |
+| $E_7$ | $x^3 + xy^3$ | $7$ |
+| $E_8$ | $x^3 + y^5$ | $8$ |
+
+The **Milnor number** is $\mu = \dim_\mathbb{R} \frac{\mathcal{O}}{\langle \partial f / \partial x_1, \ldots, \partial f / \partial x_n \rangle}$, the dimension of the local algebra of the singularity. It counts the number of non-degenerate critical points the singularity splits into under a generic perturbation.
+
+> **Note on dimensions.** The normal forms above are written in the minimal number of variables needed. In higher dimensions, one simply adds a non-degenerate quadratic: e.g. the $A_n$ singularity in $\mathbb{R}^m$ is $x_1^{n+1} \pm x_2^2 \pm \cdots \pm x_m^2$. This doesn't affect the classification (by the **Splitting Lemma**, which factors off the non-degenerate directions).
+
+## 4. Why ADE? The Milnor Fiber and the Intersection Form
+
+The connection to Dynkin diagrams is through topology. Here we work in the complex setting for cleanliness, considering $f: \mathbb{C}^2 \to \mathbb{C}$.
+
+### 4.1 The Milnor Fiber
+
+Given a singularity $f$ with $f(0) = 0$, perturb it slightly to get $f_t$ (a "Morsification" — a perturbation that makes all critical points non-degenerate). The fiber
+
+$$F_t = \{x \in B_\varepsilon : f_t(x) = \delta\}$$
+
+(for small $\varepsilon, \delta, t$) is a smooth manifold called the **Milnor fiber**. For surface singularities in $\mathbb{C}^2$, the Milnor fiber is a surface (real dimension 2) with the topology of a disc with $\mu$ handles — a surface of genus $g$ with boundary, where $\mu$ is the Milnor number.
+
+### 4.2 Vanishing Cycles
+
+Each of the $\mu$ non-degenerate critical points of $f_t$ contributes a **vanishing cycle** $\delta_i \in H_1(F_t, \mathbb{Z})$ — a loop in the Milnor fiber that shrinks to a point as $t \to 0$.
+
+The $\mu$ vanishing cycles $\delta_1, \ldots, \delta_\mu$ form a basis of $H_1(F_t, \mathbb{Z}) \cong \mathbb{Z}^\mu$.
+
+### 4.3 The Intersection Form
+
+The first homology of the Milnor fiber carries a natural **intersection form**:
+
+$$\langle \delta_i, \delta_j \rangle = \text{(signed intersection number of cycles } \delta_i \text{ and } \delta_j \text{)}$$
+
+This gives a symmetric bilinear form on $\mathbb{Z}^\mu$. In a distinguished basis of vanishing cycles, the intersection matrix has the form:
+
+$$\langle \delta_i, \delta_j \rangle = \begin{cases}
+-2 & \text{if } i = j \\
+0 \text{ or } 1 & \text{if } i \neq j
+\end{cases}$$
+
+Now define the matrix $C_{ij} = -\langle \delta_i, \delta_j \rangle$. Then:
+- $C_{ii} = 2$ for all $i$
+- $C_{ij} = 0$ or $-1$ for $i \neq j$
+
+**This is exactly a Cartan matrix of ADE type.** The vanishing cycles that intersect (with $C_{ij} = -1$) are connected by an edge in the Dynkin diagram.
+
+### 4.4 The Result
+
+For each simple singularity, the intersection form of the vanishing cycles gives:
+
+| Singularity | Normal form | Vanishing cycles | Intersection form |
+|------------|-----------|-----------------|-------------------|
+| $A_n$ | $x^{n+1} + y^2$ | $n$ cycles in a chain | $A_n$ Dynkin diagram |
+| $D_n$ | $x^2 y + y^{n-1}$ | $n$ cycles, chain + fork | $D_n$ Dynkin diagram |
+| $E_6$ | $x^3 + y^4$ | 6 cycles | $E_6$ Dynkin diagram |
+| $E_7$ | $x^3 + xy^3$ | 7 cycles | $E_7$ Dynkin diagram |
+| $E_8$ | $x^3 + y^5$ | 8 cycles | $E_8$ Dynkin diagram |
+
+Moreover, the **monodromy** of the singularity (the map on $H_1(F_t)$ induced by transporting the fiber around the singular value) acts as a **Coxeter element** of the corresponding Weyl group — a product of all simple reflections $s_1 s_2 \cdots s_n$. These are exactly the mutation matrices from the mutation game!
+
+## 5. Worked Example: $A_n$ in Detail
+
+### 5.1 The Singularity
+
+Take $f(x, y) = x^{n+1} + y^2$. The origin is an isolated singularity:
+
+$$\frac{\partial f}{\partial x} = (n+1)x^n = 0, \quad \frac{\partial f}{\partial y} = 2y = 0 \implies (x, y) = (0, 0)$$
+
+The Milnor number is $\mu = n$ (the local algebra has basis $1, x, x^2, \ldots, x^{n-1}$).
+
+### 5.2 Morsification
+
+Perturb to a Morse function by separating the $n$ critical points. A convenient choice:
+
+$$f_t(x, y) = x^{n+1} - t_1 x^{n-1} - t_2 x^{n-2} - \cdots - t_n x + y^2$$
+
+For generic small $t = (t_1, \ldots, t_n)$, this has $n$ non-degenerate critical points $p_1, \ldots, p_n$ with distinct critical values, arranged along the real $x$-axis.
+
+### 5.3 The Vanishing Cycles
+
+Each critical point $p_i$ contributes a vanishing cycle $\delta_i$ — a circle in the fiber that collapses as we approach $p_i$. Since the critical points are arranged on a line:
+
+- **Adjacent** critical points $p_i$ and $p_{i+1}$ have vanishing cycles that intersect once: $\langle \delta_i, \delta_{i+1} \rangle = \pm 1$
+- **Non-adjacent** critical points have disjoint vanishing cycles: $\langle \delta_i, \delta_j \rangle = 0$ for $|i - j| > 1$
+
+The intersection graph is therefore a **path**: $\delta_1 - \delta_2 - \cdots - \delta_n$, which is exactly the $A_n$ Dynkin diagram.
+
+### 5.4 The Monodromy
+
+The monodromy matrix (in the basis of vanishing cycles) is:
+
+$$h = s_1 \circ s_2 \circ \cdots \circ s_n$$
+
+where $s_i$ is the Picard-Lefschetz reflection (= mutation) associated to $\delta_i$:
+
+$$s_i(v) = v + \langle v, \delta_i \rangle \delta_i$$
+
+This is exactly the Coxeter element of the $A_n$ Weyl group.
+
+## 6. Worked Example: $D_n$ in Detail
+
+### 6.1 The Singularity
+
+$f(x, y) = x^2 y + y^{n-1}$ for $n \geq 4$. The partial derivatives:
+
+$$\frac{\partial f}{\partial x} = 2xy = 0, \quad \frac{\partial f}{\partial y} = x^2 + (n-1)y^{n-2} = 0$$
+
+From the first equation, $x = 0$ or $y = 0$. If $x = 0$, then $(n-1)y^{n-2} = 0$ so $y = 0$. If $y = 0$, then $x^2 = 0$ so $x = 0$. The origin is an isolated singularity with $\mu = n$.
+
+### 6.2 The Vanishing Cycles
+
+After Morsification, the $n$ vanishing cycles arrange themselves as:
+
+- A chain of $n-2$ cycles: $\delta_1 - \delta_2 - \cdots - \delta_{n-2}$
+- Two additional cycles $\delta_{n-1}$ and $\delta_n$ that both intersect $\delta_{n-2}$ but not each other
+
+The intersection graph is:
+
+```
+δ₁ — δ₂ — ··· — δₙ₋₂ — δₙ₋₁
+                    \
+                     δₙ
+```
+
+This is the $D_n$ Dynkin diagram — a path with a fork at one end.
+
+## 7. The E-type Singularities
+
+The exceptional cases arise from specific normal forms where the vanishing cycles produce branched intersection patterns:
+
+### $E_6$: $f = x^3 + y^4$
+
+Six vanishing cycles. The Morsification splits the singularity into 6 Morse critical points whose vanishing cycles intersect in the $E_6$ pattern: a chain of 5 with one branch off the third node.
+
+### $E_7$: $f = x^3 + xy^3$
+
+Seven vanishing cycles in the $E_7$ pattern.
+
+### $E_8$: $f = x^3 + y^5$
+
+Eight vanishing cycles in the $E_8$ pattern. This is the most complex simple singularity. Any attempt to write a "more complicated" two-variable singularity either decomposes into simpler ones or has infinitely many perturbation types (i.e. is not simple).
+
+## 8. Thom's Seven Catastrophes
+
+Thom's catastrophe theory (1960s-70s) studies how families of functions depend on **control parameters**. The **codimension** of a singularity is the number of parameters needed to encounter it generically in a family.
+
+For the ADE singularities, the codimension equals the Milnor number minus 1 (for the A-types) or the Milnor number (for D and E types), after accounting for the unfolding structure. More precisely, the **codimension** (= number of control parameters in the universal unfolding) is:
+
+| Type | Normal form | Codimension | Universal unfolding |
+|------|-----------|-------------|---------------------|
+| $A_2$ | $x^3$ | 1 | $x^3 + ax$ |
+| $A_3$ | $x^4$ | 2 | $x^4 + ax^2 + bx$ |
+| $A_4$ | $x^5$ | 3 | $x^5 + ax^3 + bx^2 + cx$ |
+| $A_5$ | $x^6$ | 4 | $x^6 + ax^4 + bx^3 + cx^2 + dx$ |
+| $D_4^-$ | $x^3 - xy^2$ | 3 | $x^3 - xy^2 + a(x^2+y^2) + bx + cy$ |
+| $D_4^+$ | $x^3 + xy^2$ | 3 | $x^3 + xy^2 + a(x^2+y^2) + bx + cy$ |
+| $D_5$ | $x^2y + y^4$ | 4 | $x^2y + y^4 + ay^2 + bx^2 + cy + dx$ |
+
+Thom's insight: in any generic family of functions with **at most 4 control parameters**, the only singularities you will encounter are these seven types. (The $D_4$ type has two real forms — the elliptic and hyperbolic umbilic — counting as two catastrophes.)
+
+Their traditional names:
+
+| ADE type | Catastrophe name | Codimension | Geometry |
+|----------|-----------------|-------------|----------|
+| $A_2$ | **Fold** | 1 | Two sheets merging |
+| $A_3$ | **Cusp** | 2 | Cusp of a caustic |
+| $A_4$ | **Swallowtail** | 3 | Self-intersecting surface |
+| $A_5$ | **Butterfly** | 4 | Butterfly-shaped bifurcation set |
+| $D_4^-$ | **Hyperbolic umbilic** | 3 | Wave crests on shallow water |
+| $D_4^+$ | **Elliptic umbilic** | 3 | Light focusing patterns |
+| $D_5$ | **Parabolic umbilic** | 4 | Transition between hyperbolic and elliptic |
+
+The remaining ADE types ($A_n$ for $n \geq 6$, $D_n$ for $n \geq 6$, $E_6$, $E_7$, $E_8$) have codimension $\geq 5$ and do not appear in generic families with 4 or fewer parameters — they require very special tuning to produce. This is why Thom stopped at seven: it is the complete list for the physical world of $\leq 4$ control parameters.
+
+## 9. Summary: The Chain of Connections
+
+$$\boxed{\text{Simple singularity}} \xrightarrow{\text{Morsification}} \boxed{\text{Vanishing cycles}} \xrightarrow{\text{Intersection form}} \boxed{\text{Cartan matrix}} \xleftarrow{\text{Mutation game}} \boxed{\text{Dynkin diagram}}$$
+
+1. Start with a degenerate critical point of a smooth function
+2. Perturb it to split into $\mu$ non-degenerate critical points (Morsification)
+3. Each critical point contributes a vanishing cycle in the Milnor fiber
+4. The intersection numbers of vanishing cycles give the Cartan matrix
+5. The Cartan matrix is the same one that arises from the mutation game on the Dynkin diagram
+6. The monodromy = product of Picard-Lefschetz reflections = Coxeter element of the Weyl group
+
+The mutation game, the root system, the Weyl group, and the singularity theory are all manifestations of the same underlying combinatorial-topological structure, encoded by the Dynkin diagram.
+
+## References
+
+- V. I. Arnold, S. M. Gusein-Zade, A. N. Varchenko, *Singularities of Differentiable Maps*, Vol. I, Birkhäuser, 1985.
+- R. Thom, *Structural Stability and Morphogenesis*, Benjamin, 1975.
+- J. W. Milnor, *Singular Points of Complex Hypersurfaces*, Annals of Mathematics Studies 61, Princeton, 1968.
+- E. Brieskorn, "Die Auflösung der rationalen Singularitäten holomorpher Abbildungen," *Math. Annalen* 178 (1968), 255–270.
+- P. Slodowy, *Simple Singularities and Simple Algebraic Groups*, Lecture Notes in Mathematics 815, Springer, 1980.
