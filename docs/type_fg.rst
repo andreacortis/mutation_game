@@ -62,7 +62,7 @@ the middle:
 
 .. math::
 
-   0 - 1 \xRightarrow{2,1} 2 - 3
+   0 - 1 \overset{2}{\underset{1}{\rightleftarrows}} 2 - 3
 
 .. code-block:: pycon
 

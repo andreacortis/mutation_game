@@ -6,7 +6,7 @@ a path on *n* nodes with a **(2,1) directed edge** at one end.
 
 .. math::
 
-   0 - 1 - \cdots - (n{-}2) \xRightarrow{2,1} (n{-}1)
+   0 - 1 - \cdots - (n{-}2) \overset{2}{\underset{1}{\rightleftarrows}} (n{-}1)
 
 That is, there are 2 directed edges from node :math:`n{-}2` to :math:`n{-}1`,
 and 1 edge back. All other edges are simple (type 1,1).

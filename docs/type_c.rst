@@ -6,7 +6,7 @@ a path on *n* nodes with a **(1,2) directed edge** at one end.
 
 .. math::
 
-   0 - 1 - \cdots - (n{-}2) \xLeftarrow{1,2} (n{-}1)
+   0 - 1 - \cdots - (n{-}2) \overset{1}{\underset{2}{\rightleftarrows}} (n{-}1)
 
 That is, there is 1 directed edge from node :math:`n{-}2` to :math:`n{-}1`,
 and 2 edges back. This is the **reverse** of the B-type double edge.
