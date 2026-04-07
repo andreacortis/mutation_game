@@ -142,6 +142,9 @@ Whether the root system is finite depends on the graph:
   not of ADE type), the mutation process generates infinitely many distinct
   roots.
 
+A complete proof that the ADE diagrams are the *only* simply-laced finite-type
+graphs is given in :doc:`classification_proof`.
+
 The Cartan matrix and finite-type classification
 -------------------------------------------------
 

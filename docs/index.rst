@@ -11,6 +11,7 @@ mutations and visualizes the mutation graph.
    :maxdepth: 2
 
    background
+   classification_proof
    getting_started
    explorations
    api
