@@ -1,10 +1,10 @@
 """Generate example images for the documentation."""
-import sys
-sys.path.insert(0, "..")
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import matplotlib
 matplotlib.use("Agg")
 
-from mutation import MutationGame
+from mutation_game import MutationGame
 
 # A3 positive roots
 game = MutationGame.from_dynkin("A3")

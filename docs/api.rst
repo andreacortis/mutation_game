@@ -1,7 +1,7 @@
 API Reference
 =============
 
-.. autoclass:: mutation.MutationGame
+.. autoclass:: mutation_game.MutationGame
    :members:
    :undoc-members:
    :show-inheritance:

@@ -168,7 +168,7 @@ an unbounded BFS.
 
 .. code-block:: pycon
 
-   >>> from mutation import MutationGame
+   >>> from mutation_game import MutationGame
    >>> game = MutationGame.from_dynkin("D4")
    >>> game.is_finite_type()
    True

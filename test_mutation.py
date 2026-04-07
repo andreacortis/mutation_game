@@ -4,7 +4,7 @@ import pytest
 import matplotlib
 matplotlib.use("Agg")  # non-interactive backend for tests
 
-from mutation import MutationGame
+from mutation_game import MutationGame
 
 
 # --- from_dynkin construction ---

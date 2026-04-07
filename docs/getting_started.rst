@@ -24,7 +24,7 @@ The quickest way to get started is with a named Dynkin diagram:
 
 .. code-block:: python
 
-   from mutation import MutationGame
+   from mutation_game import MutationGame
 
    game = MutationGame.from_dynkin("A3")
 

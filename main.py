@@ -1,5 +1,5 @@
 def main():
-    from mutation import MutationGame
+    from mutation_game import MutationGame
     # --- Example: Playing on the A3 Graph (0-1-2) ---
     # Diagram: (Node 0) --- (Node 1) --- (Node 2)
     a3_graph = [
