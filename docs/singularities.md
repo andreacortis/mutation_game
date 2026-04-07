@@ -78,6 +78,92 @@ Since all $A_n$ types have corank 1 and all $D_n$, $E_n$ types have corank 2, no
 
 This is a deep result: it says the algebraic structure of the quotient ring captures everything about the geometry of the singularity. The proof that the ADE normal forms are mutually inequivalent therefore reduces to checking that their local algebras are pairwise non-isomorphic, which follows from the Milnor number alone (since they all have distinct $\mu$ values, except $D_n$ and $A_n$ at the same $n$, which are separated by the corank).
 
+### How do we construct the coordinate change explicitly?
+
+Knowing two singularities are equivalent (same invariants) doesn't hand us the map $\phi$. There are three main techniques for constructing it.
+
+**Method 1: The homotopy method (Moser's path method).**
+
+This is the most powerful general technique. The idea is to connect $f$ and $g$ by a smooth path and show the equivalence exists at every step.
+
+Given $f$ and $g$ with the same type, define a one-parameter family:
+
+$$F_t = (1-t) f + t g, \qquad t \in [0, 1]$$
+
+We seek a family of diffeomorphisms $\phi_t$ satisfying $F_t \circ \phi_t = f$ for all $t$, with $\phi_0 = \text{id}$. Differentiating in $t$:
+
+$$\frac{\partial F_t}{\partial t} \circ \phi_t + \nabla F_t(\phi_t) \cdot \dot{\phi}_t = 0$$
+
+This gives a first-order PDE for the velocity field $\dot{\phi}_t$. The key step is to show that $g - f$ belongs to the **Jacobian ideal** $J(F_t)$ for all $t$, which lets us solve for $\dot{\phi}_t$ as a smooth vector field.
+
+Concretely, if we can write:
+
+$$g(x) - f(x) = \sum_{i=1}^n a_i(x) \frac{\partial F_t}{\partial x_i}(x)$$
+
+for smooth functions $a_i$ (depending on $t$), then $\dot{\phi}_t = -(a_1, \ldots, a_n)$ defines the flow, and integrating from $t = 0$ to $t = 1$ gives $\phi = \phi_1$.
+
+**Example.** Take $f = x^3 + y^2$ and $g = x^3 + 5y^2$. We have $F_t = x^3 + (1 + 4t)y^2$ and:
+
+$$g - f = 4y^2$$
+
+We need $4y^2 \in J(F_t) = \langle 3x^2, 2(1+4t)y \rangle$. Indeed:
+
+$$4y^2 = \frac{2y}{1 + 4t} \cdot 2(1+4t)y$$
+
+So the velocity field is $(0, -2y/(1+4t))$. Integrating $\dot{Y} = -2Y/(1+4t)$ from $t=0$ to $t=1$ gives $Y(1) = y / \sqrt{5}$, recovering the expected coordinate change $\phi(x,y) = (x, y/\sqrt{5})$.
+
+**Method 2: Jet determination (finite order Taylor matching).**
+
+For "finitely determined" singularities (which includes all simple singularities), one only needs to match finitely many Taylor coefficients. A singularity is **$k$-determined** if any $g$ with the same $k$-jet (Taylor expansion up to order $k$) is right-equivalent to $f$.
+
+The ADE singularities are finitely determined:
+
+| Type | Normal form | Determinacy |
+|------|-----------|-------------|
+| $A_n$ | $x^{n+1}$ | $(n+1)$-determined |
+| $D_n$ | $x^2 y + y^{n-1}$ | $(n-1)$-determined |
+| $E_6$ | $x^3 + y^4$ | 4-determined |
+| $E_7$ | $x^3 + xy^3$ | 4-determined |
+| $E_8$ | $x^3 + y^5$ | 5-determined |
+
+This means: to reduce a given $f$ to its normal form, we only need to eliminate higher-order terms up to degree $k$, after which all remaining terms can be killed at once. The coordinate change $\phi$ is then built as a composition of polynomial maps, one for each order being eliminated.
+
+**Example.** Consider $f(x) = x^3 + x^4$. This should be $A_2$ (since $\mu = 2$ and corank 1). To find the coordinate change explicitly:
+
+*Step 1.* Set $x = u + a u^2 + \cdots$ and substitute:
+
+$$f = (u + au^2)^3 + (u + au^2)^4 = u^3 + 3au^4 + \cdots + u^4 + \cdots$$
+
+$$= u^3 + (3a + 1)u^4 + \cdots$$
+
+*Step 2.* Choose $a = -1/3$ to kill the $u^4$ term. Continue order by order.
+
+Since $A_2$ is 3-determined, once the degree-3 term is $u^3$, all higher-order terms can be eliminated. The resulting $\phi$ is a formal power series, and by Borel's theorem it can be realized as a smooth function.
+
+**Method 3: The Splitting Lemma (separating non-degenerate directions).**
+
+This handles the reduction from $n$ variables to the minimal number. If $f: \mathbb{R}^n \to \mathbb{R}$ has corank $c$ at the origin (so the Hessian has rank $n - c$), then there is a smooth coordinate change putting $f$ in the form:
+
+$$f(x_1, \ldots, x_n) = g(x_1, \ldots, x_c) \pm x_{c+1}^2 \pm \cdots \pm x_n^2$$
+
+where $g$ depends only on $c$ variables and has zero Hessian. The coordinate change is constructed inductively: at each step, one "completes the square" to split off one non-degenerate direction.
+
+**Example.** $f(x, y) = x^2 + xy + y^3$. The Hessian at the origin is:
+
+$$H = \begin{pmatrix} 2 & 1 \\ 1 & 0 \end{pmatrix}, \qquad \text{rank} = 2, \quad \text{corank} = 0$$
+
+Since the corank is 0, this is a Morse point (non-degenerate). We complete the square:
+
+$$f = \left(x + \frac{y}{2}\right)^2 - \frac{y^2}{4} + y^3 = u^2 + y^3 - \frac{y^2}{4}$$
+
+where $u = x + y/2$. Now $-y^2/4 + y^3 = y^2(-1/4 + y)$, and for $y$ near 0 this has a non-degenerate critical point. Further analysis gives a Morse function, confirming corank 0.
+
+A more interesting example: $f(x, y) = x^2 + y^3$. The Hessian is:
+
+$$H = \begin{pmatrix} 2 & 0 \\ 0 & 0 \end{pmatrix}, \qquad \text{corank} = 1$$
+
+The splitting lemma gives $f = x^2 + g(y)$ where $g(y) = y^3$, which is the $A_2$ normal form. Here the coordinate change is the identity — the function was already split.
+
 ## 3. Simple Singularities
 
 A singularity is **simple** if a sufficiently small neighborhood of $f$ in function space contains only finitely many equivalence classes of singularities.
