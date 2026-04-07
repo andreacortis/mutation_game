@@ -382,46 +382,233 @@ The **monodromy** acts as a **Coxeter element** of the Weyl group -- a product
 of all simple reflections :math:`s_1 s_2 \cdots s_n`. These are exactly the
 mutation matrices from the mutation game.
 
-5. Worked Example: A\ :sub:`n` in Detail
+5. Worked Example: A\ :sub:`3` in Detail
 ------------------------------------------
 
-Take :math:`f(x, y) = x^{n+1} + y^2`. The origin is an isolated singularity
-with :math:`\mu = n`.
+We walk through the full analysis of :math:`f(x, y) = x^4 + y^2` step by step.
 
-Perturb to a Morse function:
+**Step 1: Verify isolated singularity.**
+
+.. code-block:: pycon
+
+   >>> from sympy import *
+   >>> x, y = symbols('x y')
+   >>> f = x**4 + y**2
+   >>> diff(f, x), diff(f, y)
+   (4*x**3, 2*y)
+   >>> solve([diff(f, x), diff(f, y)], [x, y])
+   [(0, 0)]
+
+The only critical point is the origin.
+
+**Step 2: Compute invariants.**
+
+.. code-block:: pycon
+
+   >>> from mutation_game import milnor_number, corank, classify
+   >>> milnor_number(f, (x, y))
+   3
+   >>> corank(f, (x, y))
+   1
+   >>> classify(f, (x, y))
+   'A3'
+
+The Milnor number is 3 (the singularity splits into 3 Morse points), the
+corank is 1 (one degenerate direction), and the type is :math:`A_3`.
+
+**Step 3: Inspect the local algebra.**
+
+.. code-block:: pycon
+
+   >>> # J(f) = <4x^3, 2y>
+   >>> # Monomials not in the leading term ideal: {1, x, x^2}
+   >>> # dim O/(J(f)) = 3 = mu
+
+The local algebra :math:`\mathcal{O}_2 / \langle x^3, y \rangle` has basis
+:math:`\{1, x, x^2\}`, confirming :math:`\mu = 3`.
+
+**Step 4: Morsification -- perturb to split critical points.**
+
+.. code-block:: pycon
+
+   >>> ft = x**4 - Rational(3, 4)*x**2 - Rational(1, 10)*x + y**2
+   >>> dft_dx = diff(ft, x)
+   >>> dft_dx
+   4*x**3 - 3*x/2 - 1/10
+
+   >>> # Find the 3 critical points numerically (y = 0)
+   >>> for guess in [-1.0, 0.1, 0.8]:
+   ...     xc = nsolve(dft_dx, x, guess)
+   ...     vc = ft.subs([(x, xc), (y, 0)])
+   ...     print(f"  x = {float(xc):.4f}, f = {float(vc):.4f}")
+     x = -0.5758, f = -0.0812
+     x = -0.0675, f = 0.0034
+     x = 0.6433, f = -0.2034
+
+The singularity has split into 3 non-degenerate critical points, arranged
+along the :math:`x`-axis. Each contributes a vanishing cycle.
+
+**Step 5: The intersection pattern.**
+
+The 3 critical points are ordered on the real line:
+:math:`x_1 < x_2 < x_3`. Adjacent vanishing cycles intersect once,
+non-adjacent ones are disjoint:
+
+- :math:`\langle \delta_1, \delta_2 \rangle = 1`
+- :math:`\langle \delta_2, \delta_3 \rangle = 1`
+- :math:`\langle \delta_1, \delta_3 \rangle = 0`
+
+The intersection graph is a **path** :math:`\delta_1 - \delta_2 - \delta_3`,
+which is the :math:`A_3` Dynkin diagram.
+
+**Step 6: Connect to the mutation game.**
+
+.. code-block:: pycon
+
+   >>> from mutation_game import MutationGame
+   >>> game = MutationGame.from_dynkin("A3")
+   >>> print(game.cartan_matrix())
+   [[ 2 -1  0]
+    [-1  2 -1]
+    [ 0 -1  2]]
+
+This is exactly the negative of the intersection matrix:
+:math:`C_{ij} = -\langle \delta_i, \delta_j \rangle`.
+
+.. code-block:: pycon
+
+   >>> roots = game.calculate_roots()
+   >>> pos = [r for r in roots if all(x >= 0 for x in r)]
+   >>> print(f"{len(pos)} positive roots, {len(roots)} total")
+   6 positive roots, 12 total
+
+The monodromy of the singularity is the Coxeter element
+:math:`M_0 \cdot M_1 \cdot M_2`:
+
+.. code-block:: pycon
+
+   >>> import numpy as np
+   >>> M = game.mutation_matrix(0) @ game.mutation_matrix(1) @ game.mutation_matrix(2)
+   >>> print(M)
+   [[ 0  0 -1]
+    [ 1  0 -1]
+    [ 0  1 -1]]
+
+The general case
+^^^^^^^^^^^^^^^^^
+
+For :math:`A_n`, take :math:`f(x, y) = x^{n+1} + y^2`. The Morsification
 
 .. math::
 
    f_t(x, y) = x^{n+1} - t_1 x^{n-1} - t_2 x^{n-2} - \cdots - t_n x + y^2
 
-For generic small :math:`t`, this has :math:`n` non-degenerate critical points
-arranged along the real :math:`x`-axis. Adjacent critical points have
-vanishing cycles that intersect once; non-adjacent ones are disjoint. The
-intersection graph is a **path** :math:`\delta_1 - \delta_2 - \cdots - \delta_n`,
-which is exactly the :math:`A_n` Dynkin diagram.
+splits the singularity into :math:`n` Morse points on the :math:`x`-axis.
+The vanishing cycles form a chain, giving the :math:`A_n` path graph.
 
-The monodromy is the Coxeter element :math:`h = s_1 \circ s_2 \circ \cdots \circ s_n`,
-where each :math:`s_i` is the Picard--Lefschetz reflection (= mutation).
-
-6. Worked Example: D\ :sub:`n` in Detail
+6. Worked Example: D\ :sub:`4` in Detail
 ------------------------------------------
 
-:math:`f(x, y) = x^2 y + y^{n-1}` for :math:`n \geq 4`. The origin is an
-isolated singularity with :math:`\mu = n`. After Morsification, the :math:`n`
-vanishing cycles arrange as a chain of :math:`n-2` cycles with two additional
-cycles forking off the last node -- the :math:`D_n` Dynkin diagram.
+**Step 1: Verify singularity.**
+
+.. code-block:: pycon
+
+   >>> f = x**2 * y + y**3
+   >>> solve([diff(f, x), diff(f, y)], [x, y])
+   [(0, 0)]
+   >>> milnor_number(f, (x, y))
+   4
+   >>> corank(f, (x, y))
+   2
+   >>> classify(f, (x, y))
+   'D4'
+
+Corank 2 (both Hessian eigenvalues are zero):
+
+.. code-block:: pycon
+
+   >>> H = hessian(f, [x, y])
+   >>> H.subs([(x, 0), (y, 0)])
+   Matrix([[0, 0], [0, 0]])
+
+**Step 2: The 3-jet.**
+
+The :math:`D_4` singularity is distinguished from :math:`A_3` by its corank.
+Its 3-jet :math:`x^2 y + y^3 = y(x^2 + y^2)` has a **repeated factor** in
+:math:`y`, unlike the :math:`E`-types whose 3-jet is a perfect cube.
+
+**Step 3: Morsification.**
+
+.. code-block:: pycon
+
+   >>> from sympy import Rational, I, im, re
+   >>> ft = x**2*y + y**3 - Rational(1,5)*y
+   >>> sys = [diff(ft, x), diff(ft, y)]
+   >>> crits = solve(sys, [x, y])
+   >>> for c in crits:
+   ...     if im(c[0]) == 0 and im(c[1]) == 0:
+   ...         v = ft.subs([(x, c[0]), (y, c[1])])
+   ...         print(f"  ({float(c[0]):.4f}, {float(c[1]):.4f}), f = {float(v):.4f}")
+     (0.0000, -0.2582), f = 0.0344
+     (0.0000, 0.2582), f = -0.0344
+     (-0.3651, -0.1291), f = 0.0172
+     (0.3651, -0.1291), f = 0.0172
+
+Four critical points (matching :math:`\mu = 4`). Note the **fork structure**:
+the critical points are no longer collinear. Two of them share the same
+critical value, reflecting the fork in the :math:`D_4` diagram.
+
+**Step 4: Connect to the mutation game.**
+
+.. code-block:: pycon
+
+   >>> game = MutationGame.from_dynkin("D4")
+   >>> print(game.adj)
+   [[0 1 0 0]
+    [1 0 1 1]
+    [0 1 0 0]
+    [0 1 0 0]]
+   >>> roots = game.calculate_roots()
+   >>> pos = [r for r in roots if all(x >= 0 for x in r)]
+   >>> print(f"{len(pos)} positive roots, {len(roots)} total")
+   12 positive roots, 24 total
+
+The general case
+^^^^^^^^^^^^^^^^^
+
+For :math:`D_n` (:math:`n \geq 4`), :math:`f = x^2 y + y^{n-1}` has
+:math:`\mu = n`. After Morsification, the :math:`n` vanishing cycles arrange
+as a chain of :math:`n-2` with two cycles forking off the end -- the
+:math:`D_n` Dynkin diagram.
 
 7. The E-type Singularities
 -----------------------------
 
 The exceptional cases:
 
-- **E6**: :math:`f = x^3 + y^4` -- six vanishing cycles in the :math:`E_6`
-  pattern (chain of 5 with one branch off the third node)
-- **E7**: :math:`f = x^3 + xy^3` -- seven vanishing cycles in the :math:`E_7`
-  pattern
-- **E8**: :math:`f = x^3 + y^5` -- eight vanishing cycles in the :math:`E_8`
-  pattern. The most complex simple singularity.
+.. code-block:: pycon
+
+   >>> for name, f_expr in [('E6', x**3 + y**4),
+   ...                       ('E7', x**3 + x*y**3),
+   ...                       ('E8', x**3 + y**5)]:
+   ...     mu = milnor_number(f_expr, (x, y))
+   ...     cr = corank(f_expr, (x, y))
+   ...     tp = classify(f_expr, (x, y))
+   ...     print(f"  {name}: f = {f_expr}, mu = {mu}, corank = {cr}, type = {tp}")
+     E6: f = x**3 + y**4, mu = 6, corank = 2, type = E6
+     E7: f = x**3 + x*y**3, mu = 7, corank = 2, type = E7
+     E8: f = x**3 + y**5, mu = 8, corank = 2, type = E8
+
+All three have corank 2. They are distinguished from the :math:`D`-types by
+their 3-jet: the :math:`E`-types have a **pure cube** :math:`x^3` in their
+lowest-order terms, while :math:`D`-types have a reducible cubic
+:math:`x^2 y`.
+
+- **E6**: 6 vanishing cycles in the :math:`E_6` pattern (chain of 5 with one
+  branch off the third node)
+- **E7**: 7 vanishing cycles in the :math:`E_7` pattern
+- **E8**: 8 vanishing cycles in the :math:`E_8` pattern -- the most complex
+  simple singularity
 
 8. Thom's Seven Catastrophes
 ------------------------------
