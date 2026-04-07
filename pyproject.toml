@@ -27,6 +27,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/andreacortis/mutation_game"
+Documentation = "https://mutation-game.readthedocs.io/en/latest/"
 Repository = "https://github.com/andreacortis/mutation_game"
 
 [build-system]

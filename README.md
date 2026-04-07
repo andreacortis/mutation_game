@@ -1,10 +1,19 @@
 # Mutation Game
 
+[![PyPI](https://img.shields.io/pypi/v/mutation-game)](https://pypi.org/project/mutation-game/)
+[![Documentation](https://readthedocs.org/projects/mutation-game/badge/?version=latest)](https://mutation-game.readthedocs.io/en/latest/)
+
 A Python library for exploring root systems through the combinatorial mutation game on graphs.
 
 Given a graph (or a Dynkin diagram name like `A3`, `D5`, `E8`), the library computes the full root system via iterated mutations and visualizes the mutation graph.
 
-## Quick start
+## Installation
+
+```bash
+pip install mutation-game
+```
+
+Or for development:
 
 ```bash
 git clone git@github.com:andreacortis/mutation_game.git
@@ -75,14 +84,15 @@ uv run pytest test_mutation.py -v
 
 ## Documentation
 
-Full Sphinx documentation with mathematical background:
+Full documentation with mathematical background is available at
+**[mutation-game.readthedocs.io](https://mutation-game.readthedocs.io/en/latest/)**
+
+To build locally:
 
 ```bash
 cd docs
 uv run sphinx-build -b html . _build/html
 ```
-
-Then open `docs/_build/html/index.html`.
 
 ## Dependencies
 
