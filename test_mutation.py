@@ -57,7 +57,7 @@ class TestFromDynkin:
 
     def test_invalid_type(self):
         with pytest.raises(ValueError):
-            MutationGame.from_dynkin("B3")
+            MutationGame.from_dynkin("X3")
 
     def test_invalid_rank(self):
         with pytest.raises(ValueError):
@@ -120,6 +120,91 @@ class TestCartan:
         C = g.cartan_matrix()
         for i in range(3):
             npt.assert_allclose(C @ vecs[:, i], vals[i] * vecs[:, i], atol=1e-10)
+
+
+# --- Non-simply-laced types (directed multigraphs) ---
+
+class TestNonSimplyLaced:
+    def test_b2_adjacency(self):
+        g = MutationGame.from_dynkin("B2")
+        # 2 edges from 0→1, 1 edge from 1→0
+        assert g.adj[0, 1] == 2
+        assert g.adj[1, 0] == 1
+
+    def test_g2_adjacency(self):
+        g = MutationGame.from_dynkin("G2")
+        assert g.adj[0, 1] == 3
+        assert g.adj[1, 0] == 1
+
+    def test_f4_adjacency(self):
+        g = MutationGame.from_dynkin("F4")
+        assert g.adj[0, 1] == 1  # simple
+        assert g.adj[1, 2] == 2  # double
+        assert g.adj[2, 1] == 1
+        assert g.adj[2, 3] == 1  # simple
+
+    def test_c3_adjacency(self):
+        g = MutationGame.from_dynkin("C3")
+        assert g.adj[1, 2] == 1
+        assert g.adj[2, 1] == 2
+
+    @pytest.mark.parametrize("n,expected_positive", [
+        (2, 4), (3, 9), (4, 16), (5, 25),
+    ])
+    def test_b_n_positive_roots(self, n, expected_positive):
+        g = MutationGame.from_dynkin(f"B{n}")
+        roots = g.calculate_roots()
+        assert len(roots) == 2 * expected_positive
+
+    @pytest.mark.parametrize("n,expected_positive", [
+        (3, 9), (4, 16), (5, 25),
+    ])
+    def test_c_n_positive_roots(self, n, expected_positive):
+        g = MutationGame.from_dynkin(f"C{n}")
+        roots = g.calculate_roots()
+        assert len(roots) == 2 * expected_positive
+
+    def test_g2_roots(self):
+        g = MutationGame.from_dynkin("G2")
+        roots = g.calculate_roots()
+        assert len(roots) == 12
+
+    def test_f4_roots(self):
+        g = MutationGame.from_dynkin("F4")
+        roots = g.calculate_roots()
+        assert len(roots) == 48
+
+    def test_bcfg_finite_type(self):
+        for name in ["B2", "B5", "C3", "C5", "F4", "G2"]:
+            g = MutationGame.from_dynkin(name)
+            assert g.is_finite_type(), f"{name} should be finite type"
+
+    def test_bcfg_roots_symmetric(self):
+        """Every root has its negative also in the set."""
+        for name in ["B3", "C4", "G2", "F4"]:
+            g = MutationGame.from_dynkin(name)
+            roots = g.calculate_roots()
+            root_set = {tuple(r) for r in roots}
+            for r in roots:
+                assert tuple(-r) in root_set, f"{name}: -{list(r)} missing"
+
+    def test_b2_mutation_manual(self):
+        """Verify B2 mutation matches Wildberger's lecture example."""
+        g = MutationGame.from_dynkin("B2")
+        g.set_starting_population([1, 0])
+        # Mutate at node 1: new[1] = -0 + A[0,1]*1 = 2 (two edges from 0→1)
+        result = g.mutate(1)
+        npt.assert_array_equal(result, [1, 2])
+
+    def test_invalid_bcfg_ranks(self):
+        with pytest.raises(ValueError):
+            MutationGame.from_dynkin("B1")
+        with pytest.raises(ValueError):
+            MutationGame.from_dynkin("C2")
+        with pytest.raises(ValueError):
+            MutationGame.from_dynkin("F3")
+        with pytest.raises(ValueError):
+            MutationGame.from_dynkin("G3")
 
 
 # --- Mutation rule ---

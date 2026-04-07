@@ -3,8 +3,11 @@ import numpy as np
 class MutationGame:
     def __init__(self, adj_matrix):
         """
-        adj_matrix: A square matrix where 1 indicates a connection.
-        populations: An array representing the Martians (positive) or 
+        adj_matrix: A square matrix of non-negative integers.
+            For simple graphs: symmetric, 0/1 entries, zeros on diagonal.
+            For directed multigraphs: A[i,j] = number of directed edges
+            from node i to node j (may be non-symmetric).
+        populations: An array representing the Martians (positive) or
                      Anti-Martians (negative) at each node.
         """
         self.adj = np.array(adj_matrix)
@@ -12,22 +15,27 @@ class MutationGame:
         self.populations = np.zeros(self.num_nodes, dtype=int)
         self.name = None
         self._mutation_matrices = self._build_mutation_matrices()
-        self._cartan = 2 * np.eye(self.num_nodes, dtype=int) - self.adj
+        self._cartan = 2 * np.eye(self.num_nodes, dtype=int) - self.adj.T
 
     def _build_mutation_matrices(self):
         """
         Precompute the mutation matrix M_k for each node k.
 
-        M_k is the identity matrix with row k replaced:
+        For a directed multigraph with adjacency matrix A where A[z,x] is the
+        number of edges from z to x, the mutation at node k uses the *incoming*
+        edges (column k of A):
+
+            M_k[k, j] = A[j, k]  for j != k   (edges from j into k)
             M_k[k, k] = -1
-            M_k[k, j] = adj[k, j]  for j != k
+            M_k[i, j] = delta(i, j)  for i != k
 
         Applying mutation at node k is then: v' = M_k @ v
+        This gives: new[k] = -old[k] + sum_j A[j,k] * old[j]
         """
         matrices = []
         for k in range(self.num_nodes):
             M = np.eye(self.num_nodes, dtype=int)
-            M[k] = self.adj[k]
+            M[k] = self.adj[:, k]  # column k = incoming edges
             M[k, k] = -1
             matrices.append(M)
         return matrices
@@ -39,32 +47,71 @@ class MutationGame:
         return self._mutation_matrices[node_idx].copy()
 
     def cartan_matrix(self):
-        """Return the Cartan matrix C = 2I - A."""
+        """
+        Return the generalized Cartan matrix C = 2I - A^T.
+
+        For simple graphs (symmetric A), this is the same as 2I - A.
+        For directed multigraphs, A^T is used because the mutation at node k
+        depends on the *incoming* edges (column k of A).
+        """
         return self._cartan.copy()
+
+    def _symmetrized_cartan(self):
+        """
+        Return the symmetrized Cartan form used for positive-definiteness.
+
+        For symmetric Cartan matrices (ADE types), this is just C itself.
+        For non-symmetric cases (BCFG), finds diagonal D with positive entries
+        such that D @ C is symmetric (d_i * C[i,j] = d_j * C[j,i]), then
+        returns D @ C. Finiteness is equivalent to D @ C being positive definite.
+        """
+        C = self._cartan.astype(float)
+        if np.allclose(C, C.T):
+            return C
+        # Find D via BFS: d_i * C[i,j] = d_j * C[j,i]
+        n = self.num_nodes
+        d = np.zeros(n)
+        d[0] = 1.0
+        visited = {0}
+        queue = [0]
+        while queue:
+            i = queue.pop(0)
+            for j in range(n):
+                if j not in visited and C[i, j] != 0 and C[j, i] != 0:
+                    d[j] = d[i] * C[i, j] / C[j, i]
+                    visited.add(j)
+                    queue.append(j)
+        # Handle disconnected nodes
+        d[d == 0] = 1.0
+        return np.diag(d) @ C
 
     def is_finite_type(self):
         """
         Check whether the root system is finite.
 
-        The root system is finite if and only if the Cartan matrix C = 2I - A
-        is positive definite (all eigenvalues > 0).
+        For symmetric Cartan matrices (ADE), checks positive definiteness
+        directly. For non-symmetric cases (BCFG), checks the symmetrized
+        form D @ C.
         """
-        eigenvalues = np.linalg.eigvalsh(self._cartan)
+        S = self._symmetrized_cartan()
+        eigenvalues = np.linalg.eigvalsh(S)
         return bool(np.all(eigenvalues > 1e-10))
 
     def cartan_eigenvalues(self):
-        """Return the eigenvalues of the Cartan matrix, sorted ascending."""
-        return np.sort(np.linalg.eigvalsh(self._cartan))
+        """Return the eigenvalues of the symmetrized Cartan form, sorted ascending."""
+        S = self._symmetrized_cartan()
+        return np.sort(np.linalg.eigvalsh(S))
 
     def cartan_eigenvectors(self):
         """
-        Return the eigenvalues and eigenvectors of the Cartan matrix.
+        Return the eigenvalues and eigenvectors of the symmetrized Cartan form.
 
         Returns a tuple ``(eigenvalues, eigenvectors)`` where *eigenvalues* is
         a 1-D array sorted ascending and *eigenvectors* is a 2-D array whose
         column *i* is the eigenvector for ``eigenvalues[i]``.
         """
-        vals, vecs = np.linalg.eigh(self._cartan)
+        S = self._symmetrized_cartan()
+        vals, vecs = np.linalg.eigh(S)
         order = np.argsort(vals)
         return vals[order], vecs[:, order]
 
@@ -73,15 +120,26 @@ class MutationGame:
         """
         Create a MutationGame from a Dynkin diagram name.
 
-        Supported types (simply-laced):
-            A_n (n >= 1): path graph
-            D_n (n >= 4): path with fork at one end
-            E_6, E_7, E_8: exceptional diagrams
+        Supported types:
+            Simply-laced (symmetric adjacency):
+                A_n (n >= 1): path graph
+                D_n (n >= 4): path with fork at one end
+                E_6, E_7, E_8: exceptional diagrams
 
-        Examples: "A3", "D5", "E6"
+            Non-simply-laced (directed multigraph):
+                B_n (n >= 2): path with (2,1) edge at one end
+                C_n (n >= 3): path with (1,2) edge at one end
+                F_4: 4 nodes with (2,1) in the middle
+                G_2: 2 nodes with (3,1) edge
+
+        Note: B/C notation follows Wildberger's convention (based on the
+        directed multigraph structure), which is swapped relative to
+        Bourbaki.
+
+        Examples: "A3", "D5", "E6", "B3", "C4", "F4", "G2"
         """
         name = name.strip().upper()
-        if len(name) < 2 or name[0] not in "ADE":
+        if len(name) < 2 or name[0] not in "ABCDEFG":
             raise ValueError(f"Unknown Dynkin type: {name}")
 
         family = name[0]
@@ -97,14 +155,34 @@ class MutationGame:
             for i in range(n - 1):
                 adj[i, i + 1] = adj[i + 1, i] = 1
 
+        elif family == "B":
+            if n < 2:
+                raise ValueError("B_n requires n >= 2")
+            adj = np.zeros((n, n), dtype=int)
+            # Simple edges along the chain: 0-1-...(n-2)
+            for i in range(n - 2):
+                adj[i, i + 1] = adj[i + 1, i] = 1
+            # Double edge at the end: 2 from (n-2) to (n-1), 1 back
+            adj[n - 2, n - 1] = 2
+            adj[n - 1, n - 2] = 1
+
+        elif family == "C":
+            if n < 3:
+                raise ValueError("C_n requires n >= 3")
+            adj = np.zeros((n, n), dtype=int)
+            # Simple edges along the chain: 0-1-...(n-2)
+            for i in range(n - 2):
+                adj[i, i + 1] = adj[i + 1, i] = 1
+            # Double edge at the end: 1 from (n-2) to (n-1), 2 back
+            adj[n - 2, n - 1] = 1
+            adj[n - 1, n - 2] = 2
+
         elif family == "D":
             if n < 4:
                 raise ValueError("D_n requires n >= 4")
             adj = np.zeros((n, n), dtype=int)
-            # Main chain: 0-1-2-...-(n-3)
             for i in range(n - 3):
                 adj[i, i + 1] = adj[i + 1, i] = 1
-            # Fork: node (n-3) connects to both (n-2) and (n-1)
             adj[n - 3, n - 2] = adj[n - 2, n - 3] = 1
             adj[n - 3, n - 1] = adj[n - 1, n - 3] = 1
 
@@ -112,11 +190,27 @@ class MutationGame:
             if n not in (6, 7, 8):
                 raise ValueError("E_n is only defined for n = 6, 7, 8")
             adj = np.zeros((n, n), dtype=int)
-            # Main chain: 0-1-2-3-...-(n-2)
             for i in range(n - 2):
                 adj[i, i + 1] = adj[i + 1, i] = 1
-            # Branch: node (n-1) connects to node 2
             adj[2, n - 1] = adj[n - 1, 2] = 1
+
+        elif family == "F":
+            if n != 4:
+                raise ValueError("F_n is only defined for n = 4")
+            adj = np.zeros((4, 4), dtype=int)
+            # 0-1 simple, 1->2 double (2,1), 2-3 simple
+            adj[0, 1] = adj[1, 0] = 1
+            adj[1, 2] = 2
+            adj[2, 1] = 1
+            adj[2, 3] = adj[3, 2] = 1
+
+        elif family == "G":
+            if n != 2:
+                raise ValueError("G_n is only defined for n = 2")
+            adj = np.zeros((2, 2), dtype=int)
+            # 3 edges from 0 to 1, 1 edge from 1 to 0
+            adj[0, 1] = 3
+            adj[1, 0] = 1
 
         instance = cls(adj)
         instance.name = f"{family}{n}"
@@ -130,11 +224,14 @@ class MutationGame:
         """
         Apply the mutation at node_idx as a matrix multiplication.
 
-        The mutation matrix M_k is the identity with row k replaced so that:
-            M_k[k, k] = -1,  M_k[k, j] = adj[k, j]  for j != k
+        The mutation matrix M_k uses incoming edges (column k of A):
+            M_k[k, j] = A[j, k]  for j != k
+            M_k[k, k] = -1
 
-        This gives: new_population = M_k @ old_population, which is equivalent
-        to the mutation game rule: new[k] = -old[k] + sum(neighbors of k).
+        This gives: new[k] = -old[k] + sum_j A[j,k] * old[j]
+        For simple graphs (symmetric A), this reduces to the standard rule.
+        For directed multigraphs, each neighbor j contributes A[j,k] copies
+        of its population (one per incoming edge from j to k).
         """
         if not (0 <= node_idx < self.num_nodes):
             raise ValueError("Invalid node index.")
@@ -434,20 +531,41 @@ class MutationGame:
         fig, (ax_graph, ax_roots) = plt.subplots(1, 2, figsize=(16, 8),
                                                     gridspec_kw={"width_ratios": [1, 3]})
 
-        # Left panel: original adjacency graph
-        O = nx.from_numpy_array(self.adj)
+        # Left panel: original adjacency graph (directed multigraph)
+        is_symmetric = np.array_equal(self.adj, self.adj.T)
+        if is_symmetric:
+            O = nx.from_numpy_array(self.adj)
+        else:
+            O = nx.from_numpy_array(self.adj, create_using=nx.DiGraph)
         O = nx.relabel_nodes(O, {i: str(i) for i in range(self.num_nodes)})
         o_pos = nx.spring_layout(O, seed=42)
         o_colors = [node_colors_map[i] for i in range(self.num_nodes)]
-        nx.draw(
-            O, o_pos, ax=ax_graph,
-            with_labels=True,
-            node_size=700,
-            font_size=10,
-            node_color=o_colors,
-            edge_color="gray",
-            edgecolors="black",
-        )
+        if is_symmetric:
+            nx.draw(
+                O, o_pos, ax=ax_graph,
+                with_labels=True,
+                node_size=700,
+                font_size=10,
+                node_color=o_colors,
+                edge_color="gray",
+                edgecolors="black",
+            )
+        else:
+            nx.draw(
+                O, o_pos, ax=ax_graph,
+                with_labels=True,
+                node_size=700,
+                font_size=10,
+                node_color=o_colors,
+                edge_color="gray",
+                edgecolors="black",
+                connectionstyle="arc3,rad=0.1",
+            )
+            # Show edge weights (multiplicities) for directed multigraphs
+            edge_wts = nx.get_edge_attributes(O, "weight")
+            nx.draw_networkx_edge_labels(
+                O, o_pos, edge_labels=edge_wts, font_size=8, ax=ax_graph
+            )
         graph_title = self.name if self.name else "Input graph"
         ax_graph.set_title(graph_title)
 
