@@ -22,6 +22,16 @@ diagrams = [
     ("E6", True, "e6_positive.png"),
     ("E7", True, "e7_positive.png"),
     ("E8", True, "e8_positive.png"),
+    # Type B explorations
+    ("B2", True, "b2_positive.png"),
+    ("B3", True, "b3_positive.png"),
+    ("B4", True, "b4_positive.png"),
+    # Type C explorations
+    ("C3", True, "c3_positive.png"),
+    ("C4", True, "c4_positive.png"),
+    # Type F and G explorations
+    ("G2", True, "g2_positive.png"),
+    ("F4", True, "f4_positive.png"),
 ]
 
 for name, positive_only, filename in diagrams:
