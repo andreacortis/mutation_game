@@ -82,25 +82,6 @@
 
   // ---- Build root systems ----
 
-  // A2: hexagon in 2D
-  function buildA2() {
-    var roots = [];
-    // simple roots in R^3 (projected from R^3 -> use 2D in xy plane)
-    var a1 = [1, 0, 0], a2 = [-0.5, Math.sqrt(3)/2, 0];
-    var combos = [[1,0],[0,1],[1,1],[-1,0],[0,-1],[-1,-1]];
-    var simples = {'1,0':true, '0,1':true, '-1,0':true, '0,-1':true};
-    for (var i = 0; i < combos.length; i++) {
-      var c = combos[i];
-      var x = c[0]*a1[0] + c[1]*a2[0];
-      var y = c[0]*a1[1] + c[1]*a2[1];
-      var isPos = (c[0] > 0) || (c[0] === 0 && c[1] > 0);
-      var isSim = (c[0]===1&&c[1]===0)||(c[0]===0&&c[1]===1)||
-                  (c[0]===-1&&c[1]===0)||(c[0]===0&&c[1]===-1);
-      roots.push({p:[x,y,0], pos:isPos, simple:isSim});
-    }
-    return roots;
-  }
-
   // A3: cuboctahedron (12 roots e_i - e_j in R^4, projected)
   function buildA3() {
     var roots = [];
@@ -146,12 +127,10 @@
   }
 
   var systems = [
-    {key:'A2', name:'A\u2082', shape:'Hexagon', roots:buildA2(),
-     nPos:3, weyl:'S\u2083 (order 6)'},
     {key:'A3', name:'A\u2083', shape:'Cuboctahedron', roots:buildA3(),
-     nPos:6, weyl:'S\u2084 (order 24)'},
+     nPos:6, weyl:'S\u2084 (order 24) \u2014 rotation group of the cube'},
     {key:'B3', name:'B\u2083', shape:'Cuboctahedron + Octahedron', roots:buildB3(),
-     nPos:9, weyl:'(Z/2)\u00b3 \u22cb S\u2083 (order 48)'},
+     nPos:9, weyl:'(Z/2)\u00b3 \u22cb S\u2083 (order 48) \u2014 full symmetry group of the cube'},
   ];
 
   // ---- Three.js setup ----
@@ -260,7 +239,7 @@
     })(i);
   }
 
-  showSystem(1); // start with A3 cuboctahedron
+  showSystem(0); // start with A3 cuboctahedron
 
   function resize() {
     var w = container.clientWidth, h = container.clientHeight;
