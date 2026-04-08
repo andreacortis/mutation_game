@@ -8,18 +8,7 @@ adjacency matrix, the library computes the full root system via iterated
 mutations and visualizes the mutation graph.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: The Code
+   :maxdepth: 3
 
-   getting_started
-   explorations
-   api
-
-.. toctree::
-   :maxdepth: 2
-   :caption: The Mathematics
-
-   background
-   platonic_solids
-   singularities
-   classification_proof
+   code
+   mathematics
