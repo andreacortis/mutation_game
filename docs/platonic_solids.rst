@@ -359,10 +359,15 @@ are realized as vertices of the cuboctahedron in 3D:
      </div>
    </div>
 
-Each vertex of the cuboctahedron is a root :math:`e_i - e_j`. Positive roots
-(:math:`i < j`, shown in red) and negative roots (:math:`i > j`, in teal) sit
-on opposite sides. Simple roots :math:`e_i - e_{i+1}` and their negatives are
-highlighted in gold. Edges connect roots whose difference is itself a root.
+Each vertex of the cuboctahedron is a root :math:`e_i - e_j`, colored by
+the **dominant simple root** using the same tab10 palette as the mutation
+graph: node 0 in blue, node 1 in orange, node 2 in green. Lighter shades
+mark positive roots (:math:`i < j`), darker shades mark negative roots.
+Simple roots :math:`e_i - e_{i+1}` appear as larger saturated spheres.
+
+Edges are colored by **mutation index** -- blue edges correspond to mutation
+at node 0, orange to node 1, green to node 2 -- matching the edge labels in
+the static mutation graph.
 
 The cuboctahedral geometry reflects the :math:`S_4` symmetry of the Weyl group
 -- the same group as the rotation group of the cube/octahedron.
