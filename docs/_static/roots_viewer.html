@@ -29,9 +29,9 @@
     text-align: center; padding: 4px; font-size: 12px;
     background: #16213e; color: #888;
   }
-  #legend .pos { color: #ff6b6b; }
-  #legend .neg { color: #4ecdc4; }
-  #legend .simple { color: #ffd700; }
+  .pos-dot { color: #ff6b6b; }
+  .neg-dot { color: #4ecdc4; }
+  .simple-dot { color: #ffd700; }
 </style>
 </head>
 <body>
@@ -39,246 +39,244 @@
 <div id="viewer"></div>
 <div id="info"></div>
 <div id="legend">
-  <span class="pos">&#9679;</span> Positive roots &nbsp;&nbsp;
-  <span class="neg">&#9679;</span> Negative roots &nbsp;&nbsp;
-  <span class="simple">&#9679;</span> Simple roots &nbsp;&nbsp;
-  &#8212; Edges connect roots differing by a simple root
+  <span class="pos-dot">&#9679;</span> Positive roots &nbsp;&nbsp;
+  <span class="neg-dot">&#9679;</span> Negative roots &nbsp;&nbsp;
+  <span class="simple-dot">&#9679;</span> Simple roots &nbsp;&nbsp;
+  &#8212; Edges connect adjacent roots
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Minimal OrbitControls
-THREE.OrbitControls = function(camera, domElement) {
-  this.camera = camera; this.domElement = domElement;
-  this.target = new THREE.Vector3();
-  var scope = this, spherical = new THREE.Spherical(),
-      sphericalDelta = new THREE.Spherical(),
-      rotateStart = new THREE.Vector2(), rotateEnd = new THREE.Vector2(),
-      rotateDelta = new THREE.Vector2(), isDown = false;
-  function onDown(x,y){isDown=true;rotateStart.set(x,y);}
-  function onUp(){isDown=false;}
-  function onMove(x,y){if(!isDown)return;rotateEnd.set(x,y);rotateDelta.subVectors(rotateEnd,rotateStart);
-    sphericalDelta.theta-=2*Math.PI*rotateDelta.x/domElement.clientHeight;
-    sphericalDelta.phi-=2*Math.PI*rotateDelta.y/domElement.clientHeight;
-    rotateStart.copy(rotateEnd);}
-  domElement.addEventListener('mousedown',function(e){onDown(e.clientX,e.clientY);});
-  domElement.addEventListener('mouseup',onUp);domElement.addEventListener('mouseleave',onUp);
-  domElement.addEventListener('mousemove',function(e){onMove(e.clientX,e.clientY);});
-  domElement.addEventListener('wheel',function(e){spherical.radius*=e.deltaY>0?1.1:0.9;e.preventDefault();},{passive:false});
-  domElement.addEventListener('touchstart',function(e){if(e.touches.length===1)onDown(e.touches[0].clientX,e.touches[0].clientY);});
-  domElement.addEventListener('touchend',onUp);
-  domElement.addEventListener('touchmove',function(e){if(e.touches.length===1){onMove(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();}},{passive:false});
-  var offset=new THREE.Vector3();
-  spherical.setFromVector3(camera.position.clone().sub(scope.target));
-  this.update=function(){spherical.theta+=sphericalDelta.theta;spherical.phi+=sphericalDelta.phi;
-    spherical.phi=Math.max(0.01,Math.min(Math.PI-0.01,spherical.phi));spherical.makeSafe();
-    offset.setFromSpherical(spherical);camera.position.copy(scope.target).add(offset);
-    camera.lookAt(scope.target);sphericalDelta.theta*=0.85;sphericalDelta.phi*=0.85;};
-};
+(function() {
+  // Minimal OrbitControls
+  THREE.OrbitControls = function(camera, el) {
+    var sph = new THREE.Spherical();
+    var sphD = new THREE.Spherical();
+    var rs = new THREE.Vector2(), re = new THREE.Vector2(), rd = new THREE.Vector2();
+    var down = false;
+    sph.setFromVector3(camera.position);
+    function md(x,y){down=true;rs.set(x,y);}
+    function mu(){down=false;}
+    function mm(x,y){if(!down)return;re.set(x,y);rd.subVectors(re,rs);
+      sphD.theta-=2*Math.PI*rd.x/el.clientHeight;
+      sphD.phi-=2*Math.PI*rd.y/el.clientHeight;rs.copy(re);}
+    el.addEventListener('mousedown',function(e){md(e.clientX,e.clientY);});
+    el.addEventListener('mouseup',mu);el.addEventListener('mouseleave',mu);
+    el.addEventListener('mousemove',function(e){mm(e.clientX,e.clientY);});
+    el.addEventListener('wheel',function(e){sph.radius*=e.deltaY>0?1.1:0.9;e.preventDefault();},{passive:false});
+    el.addEventListener('touchstart',function(e){if(e.touches.length===1)md(e.touches[0].clientX,e.touches[0].clientY);});
+    el.addEventListener('touchend',mu);
+    el.addEventListener('touchmove',function(e){if(e.touches.length===1){mm(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();}},{passive:false});
+    this.update=function(){sph.theta+=sphD.theta;sph.phi+=sphD.phi;
+      sph.phi=Math.max(0.01,Math.min(Math.PI-0.01,sph.phi));sph.makeSafe();
+      var o=new THREE.Vector3().setFromSpherical(sph);
+      camera.position.copy(o);camera.lookAt(new THREE.Vector3());
+      sphD.theta*=0.85;sphD.phi*=0.85;};
+  };
 
-// Projection basis for R^4 -> R^3 (hyperplane sum=0)
-var u1 = [1/Math.sqrt(2), -1/Math.sqrt(2), 0, 0];
-var u2 = [1/Math.sqrt(6), 1/Math.sqrt(6), -2/Math.sqrt(6), 0];
-var u3 = [1/Math.sqrt(12), 1/Math.sqrt(12), 1/Math.sqrt(12), -3/Math.sqrt(12)];
+  // Projection from R^4 to R^3 (hyperplane sum=0)
+  var sq2=Math.sqrt(2),sq6=Math.sqrt(6),sq12=Math.sqrt(12);
+  var u1=[1/sq2,-1/sq2,0,0], u2=[1/sq6,1/sq6,-2/sq6,0], u3=[1/sq12,1/sq12,1/sq12,-3/sq12];
+  function dot4(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3];}
+  function proj(v4){return [dot4(v4,u1),dot4(v4,u2),dot4(v4,u3)];}
 
-function dot4(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3];}
-function toR4_A(abc){
-  var a=abc[0],b=abc[1],c=abc[2];
-  return [a, b-a, c-b, -c]; // a*alpha1 + b*alpha2 + c*alpha3
-}
-function toR4_D(abcd){
-  // D4 simple roots: alpha1=e1-e2, alpha2=e2-e3, alpha3=e3+e4, alpha4=e3-e4 (our numbering)
-  // Actually our code uses 0-1-fork(2,3), so:
-  // alpha0=e1-e2, alpha1=e2-e3, alpha2=e3-e4, alpha3=e3+e4...
-  // Simpler: just project from our basis coordinates directly
-  return abcd; // will handle differently
-}
-function projectR4(v4){return [dot4(v4,u1),dot4(v4,u2),dot4(v4,u3)];}
+  // ---- Build root systems ----
 
-// Root system data — precomputed
-var systems = {
-  'A3': {
-    name: 'A\u2083', polytope: 'Cuboctahedron',
-    nPos: 6, nTotal: 12, weyl: 'S\u2084',
-    toR4: function(r){ return [r[0], r[1]-r[0], r[2]-r[1], -r[2]]; },
-    roots: [
-      // positive
-      {r:[0,0,1],pos:true,simple:true},{r:[0,1,0],pos:true,simple:true},{r:[1,0,0],pos:true,simple:true},
-      {r:[0,1,1],pos:true,simple:false},{r:[1,1,0],pos:true,simple:false},{r:[1,1,1],pos:true,simple:false},
-      // negative
-      {r:[0,0,-1],pos:false,simple:true},{r:[0,-1,0],pos:false,simple:true},{r:[-1,0,0],pos:false,simple:true},
-      {r:[0,-1,-1],pos:false,simple:false},{r:[-1,-1,0],pos:false,simple:false},{r:[-1,-1,-1],pos:false,simple:false},
-    ]
-  },
-  'B3': {
-    name: 'B\u2083', polytope: 'Cuboctahedron + Octahedron',
-    nPos: 9, nTotal: 18, weyl: 'S\u2083 \u22c9 (Z/2)\u00b3',
-    // B3 roots in R^3: short roots +-e_i, long roots +-e_i+-e_j
-    toR4: null, // use direct 3D coords
-    roots: (function(){
-      var out = [];
-      // short: +-e_i
-      for(var i=0;i<3;i++){var v=[0,0,0];v[i]=1;out.push({r:v.slice(),pos:true,simple:i===2});
-        var w=[0,0,0];w[i]=-1;out.push({r:w.slice(),pos:false,simple:i===2});}
-      // long: +-e_i+-e_j (i<j)
-      for(var i=0;i<3;i++)for(var j=i+1;j<3;j++)
-        for(var si of[1,-1])for(var sj of[1,-1]){
-          var v=[0,0,0];v[i]=si;v[j]=sj;
-          var p=si>0&&sj>0;out.push({r:v,pos:p||(si>0&&sj<0&&i<j),simple:false});}
-      // deduplicate and fix positivity
-      var seen={},res=[];
-      out.forEach(function(x){var k=x.r.join(',');if(!seen[k]){seen[k]=1;
-        x.pos=x.r.find(function(v){return v!==0;})>0;res.push(x);}});
-      // mark simple: e1-e2=(1,-1,0), e2-e3=(0,1,-1), e3=(0,0,1) -- but this is B3 in std coords
-      return res;
-    })()
-  },
-  'A2': {
-    name: 'A\u2082', polytope: 'Hexagon',
-    nPos: 3, nTotal: 6, weyl: 'S\u2083',
-    toR4: null,
-    roots: (function(){
-      // A2 roots as 2D vectors (equilateral hexagon)
-      var a = Math.PI/6;
-      var out = [];
-      for(var i=0;i<6;i++){
-        var angle = i*Math.PI/3 + a;
-        var x = Math.cos(angle), y = Math.sin(angle);
-        out.push({r:[x,y,0], pos:i<3, simple:i===0||i===1||i===3||i===4});
-      }
-      // mark simple roots (first two positive)
-      out[0].simple=true; out[1].simple=true;
-      out[3].simple=true; out[4].simple=true;
-      return out;
-    })()
+  // A2: hexagon in 2D
+  function buildA2() {
+    var roots = [];
+    // simple roots in R^3 (projected from R^3 -> use 2D in xy plane)
+    var a1 = [1, 0, 0], a2 = [-0.5, Math.sqrt(3)/2, 0];
+    var combos = [[1,0],[0,1],[1,1],[-1,0],[0,-1],[-1,-1]];
+    var simples = {'1,0':true, '0,1':true, '-1,0':true, '0,-1':true};
+    for (var i = 0; i < combos.length; i++) {
+      var c = combos[i];
+      var x = c[0]*a1[0] + c[1]*a2[0];
+      var y = c[0]*a1[1] + c[1]*a2[1];
+      var isPos = (c[0] > 0) || (c[0] === 0 && c[1] > 0);
+      var isSim = (c[0]===1&&c[1]===0)||(c[0]===0&&c[1]===1)||
+                  (c[0]===-1&&c[1]===0)||(c[0]===0&&c[1]===-1);
+      roots.push({p:[x,y,0], pos:isPos, simple:isSim});
+    }
+    return roots;
   }
-};
 
-// Precompute A3 properly
-(function(){
-  var s = systems['A3'];
-  s.roots.forEach(function(root){
-    var v4 = s.toR4(root.r);
-    var p = projectR4(v4);
-    root.pos3d = p;
-  });
-})();
-
-// For B3 and A2, pos3d = r directly
-['B3','A2'].forEach(function(k){
-  systems[k].roots.forEach(function(root){ root.pos3d = root.r; });
-});
-
-// Scene
-var container = document.getElementById('viewer');
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-camera.position.set(3.5, 2.5, 3.5);
-var renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setClearColor(0x1a1a2e,1);
-container.appendChild(renderer.domElement);
-var controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-scene.add(new THREE.AmbientLight(0x404040, 2));
-var l1=new THREE.DirectionalLight(0xffffff,0.6);l1.position.set(5,5,5);scene.add(l1);
-
-var currentGroup = new THREE.Group();
-scene.add(currentGroup);
-
-var COL_POS = 0xff6b6b;
-var COL_NEG = 0x4ecdc4;
-var COL_SIMPLE_POS = 0xffd700;
-var COL_SIMPLE_NEG = 0xffd700;
-
-function showSystem(key) {
-  while(currentGroup.children.length) currentGroup.remove(currentGroup.children[0]);
-  var sys = systems[key];
-  var roots = sys.roots;
-
-  // Draw root vertices as spheres
-  roots.forEach(function(root){
-    var color = root.simple ? (root.pos ? COL_SIMPLE_POS : COL_SIMPLE_NEG) :
-                              (root.pos ? COL_POS : COL_NEG);
-    var radius = root.simple ? 0.09 : 0.065;
-    var geo = new THREE.SphereGeometry(radius, 16, 16);
-    var mat = new THREE.MeshPhongMaterial({color: color, emissive: color, emissiveIntensity: 0.3});
-    var mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(root.pos3d[0], root.pos3d[1], root.pos3d[2]);
-    currentGroup.add(mesh);
-  });
-
-  // Draw edges between roots that differ by a simple root
-  // Two roots are connected if their difference is a root (adjacency in root system)
-  var pts = roots.map(function(r){return r.pos3d;});
-  var lineMat = new THREE.LineBasicMaterial({color: 0x555555, transparent: true, opacity: 0.4});
-  for(var i=0;i<roots.length;i++){
-    for(var j=i+1;j<roots.length;j++){
-      var dx=pts[i][0]-pts[j][0], dy=pts[i][1]-pts[j][1], dz=pts[i][2]-pts[j][2];
-      var dist = Math.sqrt(dx*dx+dy*dy+dz*dz);
-      // For A3 cuboctahedron, adjacent vertices are at distance sqrt(2) ~ 1.414
-      // For general, connect nearest neighbors
-      if(dist < 1.5) {
-        var geo = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(pts[i][0],pts[i][1],pts[i][2]),
-          new THREE.Vector3(pts[j][0],pts[j][1],pts[j][2])
-        ]);
-        currentGroup.add(new THREE.Line(geo, lineMat));
+  // A3: cuboctahedron (12 roots e_i - e_j in R^4, projected)
+  function buildA3() {
+    var roots = [];
+    for (var i = 0; i < 4; i++) {
+      for (var j = 0; j < 4; j++) {
+        if (i === j) continue;
+        var v4 = [0,0,0,0]; v4[i] = 1; v4[j] = -1;
+        var p = proj(v4);
+        var isPos = i < j;
+        // simple roots: e0-e1, e1-e2, e2-e3 and their negatives
+        var isSim = (Math.abs(i-j) === 1);
+        roots.push({p:p, pos:isPos, simple:isSim});
       }
     }
+    return roots;
   }
 
-  // Draw transparent convex hull faces for positive roots
-  var posRoots = roots.filter(function(r){return r.pos;});
-  if(posRoots.length >= 3) {
-    var posGeo = new THREE.BufferGeometry();
-    var posPts = posRoots.map(function(r){return new THREE.Vector3(r.pos3d[0],r.pos3d[1],r.pos3d[2]);});
-    var hull = new THREE.ConvexGeometry ? null : null; // ConvexGeometry not in core
-    // Skip hull — edges are enough
+  // B3: 18 roots (6 short +-e_i, 12 long +-e_i+-e_j)
+  function buildB3() {
+    var roots = [];
+    // short roots: +-e_i
+    for (var i = 0; i < 3; i++) {
+      var vp = [0,0,0]; vp[i] = 1;
+      roots.push({p:vp, pos:true, simple:(i===0)});
+      var vn = [0,0,0]; vn[i] = -1;
+      roots.push({p:vn, pos:false, simple:(i===0)});
+    }
+    // long roots: +-e_i +- e_j (i < j)
+    var signs = [[1,1],[1,-1],[-1,1],[-1,-1]];
+    for (var i = 0; i < 3; i++) {
+      for (var j = i+1; j < 3; j++) {
+        for (var s = 0; s < 4; s++) {
+          var v = [0,0,0];
+          v[i] = signs[s][0]; v[j] = signs[s][1];
+          // positive if first nonzero component is positive
+          var firstNZ = v[0] || v[1] || v[2];
+          var isPos = firstNZ > 0;
+          roots.push({p:v, pos:isPos, simple:false});
+        }
+      }
+    }
+    return roots;
   }
 
-  // Origin marker
-  var originGeo = new THREE.SphereGeometry(0.03, 8, 8);
-  var originMat = new THREE.MeshBasicMaterial({color: 0xffffff});
-  currentGroup.add(new THREE.Mesh(originGeo, originMat));
+  var systems = [
+    {key:'A2', name:'A\u2082', shape:'Hexagon', roots:buildA2(),
+     nPos:3, weyl:'S\u2083 (order 6)'},
+    {key:'A3', name:'A\u2083', shape:'Cuboctahedron', roots:buildA3(),
+     nPos:6, weyl:'S\u2084 (order 24)'},
+    {key:'B3', name:'B\u2083', shape:'Cuboctahedron + Octahedron', roots:buildB3(),
+     nPos:9, weyl:'(Z/2)\u00b3 \u22cb S\u2083 (order 48)'},
+  ];
 
-  // Axes (faint)
-  var axLen = 2;
-  var axMat = new THREE.LineBasicMaterial({color: 0x333355, transparent: true, opacity: 0.3});
-  [[axLen,0,0],[-axLen,0,0],[0,axLen,0],[0,-axLen,0],[0,0,axLen],[0,0,-axLen]].forEach(function(p){
-    var g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3(p[0],p[1],p[2])]);
-    currentGroup.add(new THREE.Line(g, axMat));
-  });
+  // ---- Three.js setup ----
+  var container = document.getElementById('viewer');
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
+  camera.position.set(3.2, 2.4, 3.2);
+  var renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x1a1a2e, 1);
+  container.appendChild(renderer.domElement);
+  var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  // Update buttons
-  document.querySelectorAll('.btn').forEach(function(b){ b.classList.toggle('active', b.dataset.key===key); });
+  scene.add(new THREE.AmbientLight(0x606060, 2));
+  var dl = new THREE.DirectionalLight(0xffffff, 0.6);
+  dl.position.set(5, 5, 5); scene.add(dl);
 
-  // Update info
-  document.getElementById('info').innerHTML =
-    '<span class="dynkin">' + sys.name + '</span> root system &mdash; ' + sys.polytope +
-    ' &nbsp; <span class="detail">' + sys.nPos + ' positive + ' + sys.nPos + ' negative = ' +
-    sys.nTotal + ' roots &nbsp;|&nbsp; Weyl group: ' + sys.weyl + '</span>';
-}
+  var group = new THREE.Group();
+  scene.add(group);
 
-// Buttons
-var selectorDiv = document.getElementById('selector');
-Object.keys(systems).forEach(function(key){
-  var btn = document.createElement('button');
-  btn.className = 'btn'; btn.dataset.key = key;
-  btn.textContent = systems[key].name + ' (' + systems[key].polytope + ')';
-  btn.addEventListener('click', function(){ showSystem(key); });
-  selectorDiv.appendChild(btn);
-});
+  var COL_POS = 0xff6b6b, COL_NEG = 0x4ecdc4, COL_SIMPLE = 0xffd700;
 
-showSystem('A3');
+  function showSystem(idx) {
+    while (group.children.length) group.remove(group.children[0]);
+    var sys = systems[idx];
+    var roots = sys.roots;
 
-function resize(){var w=container.clientWidth,h=container.clientHeight;
-  renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
-window.addEventListener('resize',resize); resize();
+    // Root vertices
+    for (var i = 0; i < roots.length; i++) {
+      var r = roots[i];
+      var color = r.simple ? COL_SIMPLE : (r.pos ? COL_POS : COL_NEG);
+      var radius = r.simple ? 0.09 : 0.065;
+      var geo = new THREE.SphereGeometry(radius, 12, 12);
+      var mat = new THREE.MeshPhongMaterial({color:color, emissive:color, emissiveIntensity:0.3});
+      var mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(r.p[0], r.p[1], r.p[2]);
+      group.add(mesh);
+    }
 
-function animate(){requestAnimationFrame(animate);
-  currentGroup.rotation.y+=0.003;controls.update();renderer.render(scene,camera);}
-animate();
+    // Edges: connect roots at distance matching the shortest nonzero root-root distance
+    // Compute all pairwise distances first to find the edge length
+    var dists = [];
+    for (var i = 0; i < roots.length; i++) {
+      for (var j = i+1; j < roots.length; j++) {
+        var dx = roots[i].p[0]-roots[j].p[0];
+        var dy = roots[i].p[1]-roots[j].p[1];
+        var dz = roots[i].p[2]-roots[j].p[2];
+        dists.push(Math.sqrt(dx*dx+dy*dy+dz*dz));
+      }
+    }
+    dists.sort(function(a,b){return a-b;});
+    var minDist = dists[0];
+    var edgeThresh = minDist * 1.05; // small tolerance
+
+    var lineMat = new THREE.LineBasicMaterial({color:0x666688, transparent:true, opacity:0.5});
+    for (var i = 0; i < roots.length; i++) {
+      for (var j = i+1; j < roots.length; j++) {
+        var dx = roots[i].p[0]-roots[j].p[0];
+        var dy = roots[i].p[1]-roots[j].p[1];
+        var dz = roots[i].p[2]-roots[j].p[2];
+        var d = Math.sqrt(dx*dx+dy*dy+dz*dz);
+        if (d <= edgeThresh) {
+          var geo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(roots[i].p[0],roots[i].p[1],roots[i].p[2]),
+            new THREE.Vector3(roots[j].p[0],roots[j].p[1],roots[j].p[2])
+          ]);
+          group.add(new THREE.Line(geo, lineMat));
+        }
+      }
+    }
+
+    // Origin
+    var og = new THREE.SphereGeometry(0.03, 8, 8);
+    group.add(new THREE.Mesh(og, new THREE.MeshBasicMaterial({color:0xffffff})));
+
+    // Axes
+    var axMat = new THREE.LineBasicMaterial({color:0x333355, transparent:true, opacity:0.25});
+    var ax = 2.2;
+    var axPts = [[ax,0,0],[-ax,0,0],[0,ax,0],[0,-ax,0],[0,0,ax],[0,0,-ax]];
+    for (var i = 0; i < axPts.length; i++) {
+      var g = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(), new THREE.Vector3(axPts[i][0],axPts[i][1],axPts[i][2])
+      ]);
+      group.add(new THREE.Line(g, axMat));
+    }
+
+    // Update UI
+    var btns = document.querySelectorAll('.btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', i === idx);
+
+    document.getElementById('info').innerHTML =
+      '<span class="dynkin">' + sys.name + '</span> root system \u2014 ' + sys.shape +
+      ' <span class="detail">' + sys.nPos + ' positive + ' + sys.nPos + ' negative = ' +
+      (sys.nPos * 2) + ' roots \u00a0|\u00a0 Weyl group: ' + sys.weyl + '</span>';
+  }
+
+  // Build selector
+  var sel = document.getElementById('selector');
+  for (var i = 0; i < systems.length; i++) {
+    (function(idx) {
+      var btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.textContent = systems[idx].name + ' \u2014 ' + systems[idx].shape;
+      btn.addEventListener('click', function() { showSystem(idx); });
+      sel.appendChild(btn);
+    })(i);
+  }
+
+  showSystem(1); // start with A3 cuboctahedron
+
+  function resize() {
+    var w = container.clientWidth, h = container.clientHeight;
+    renderer.setSize(w, h); camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    group.rotation.y += 0.003;
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
 </script>
 </body>
 </html>
