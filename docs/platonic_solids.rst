@@ -80,7 +80,18 @@ the dual polyhedron):
 
 **Case** :math:`p \geq 6`: :math:`\frac{1}{p} + \frac{1}{q} \leq \frac{1}{6} + \frac{1}{6} < \frac{1}{2}`. **No solutions.**
 
-That gives exactly **5 Platonic solids** (3 + 2 duals).
+That gives exactly **5 Platonic solids** (3 + 2 duals). Each is labeled
+below with its corresponding Dynkin type -- the tetrahedron corresponds to
+:math:`E_6`, the cube/octahedron dual pair to :math:`E_7`, and the
+dodecahedron/icosahedron dual pair to :math:`E_8`:
+
+.. image:: _static/platonic_solids_3d.png
+   :width: 100%
+   :alt: The five Platonic solids in 3D
+
+.. image:: _static/platonic_solids_2d.png
+   :width: 100%
+   :alt: The five Platonic solids projected to 2D
 
 3. The Rotation Groups
 ------------------------
