@@ -83,15 +83,19 @@ the dual polyhedron):
 That gives exactly **5 Platonic solids** (3 + 2 duals). Each is labeled
 below with its corresponding Dynkin type -- the tetrahedron corresponds to
 :math:`E_6`, the cube/octahedron dual pair to :math:`E_7`, and the
-dodecahedron/icosahedron dual pair to :math:`E_8`:
+dodecahedron/icosahedron dual pair to :math:`E_8`.
+
+**Interactive 3D viewer** -- click and drag to rotate, scroll to zoom:
+
+.. raw:: html
+
+   <iframe src="_static/platonic_viewer.html"
+     style="width:100%; height:380px; border:1px solid #333; border-radius:6px;"
+     allowfullscreen></iframe>
 
 .. image:: _static/platonic_solids_3d.png
    :width: 100%
-   :alt: The five Platonic solids in 3D
-
-.. image:: _static/platonic_solids_2d.png
-   :width: 100%
-   :alt: The five Platonic solids projected to 2D
+   :alt: The five Platonic solids in 3D (static fallback)
 
 3. The Rotation Groups
 ------------------------
