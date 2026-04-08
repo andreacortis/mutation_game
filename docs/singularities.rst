@@ -88,11 +88,12 @@ The ``mutation_game`` library can compute this:
 .. code-block:: pycon
 
    >>> from sympy import symbols
-   >>> from mutation_game import milnor_number, corank, classify
-   >>> x, y = symbols('x y')
-   >>> milnor_number(x**3 + y**2, (x, y))
+   >>> from mutation_game import milnor_number
+   >>> x, y = symbols('x y')  # define the symbolic variables
+
+   >>> milnor_number(x**3 + y**2, (x, y))  # A2 singularity: mu = 2
    2
-   >>> milnor_number(x**4 + y**2, (x, y))
+   >>> milnor_number(x**4 + y**2, (x, y))  # A3 singularity: mu = 3
    3
 
 **Example.** For :math:`f = x^3 + y^2` (type :math:`A_2`):
@@ -133,6 +134,7 @@ The corank separates the families immediately:
    >>> from sympy import symbols
    >>> from mutation_game import corank
    >>> x, y = symbols('x y')
+
    >>> corank(x**3 + y**2, (x, y))    # A2: one degenerate direction
    1
    >>> corank(x**2*y + y**3, (x, y))  # D4: two degenerate directions
@@ -160,11 +162,12 @@ The ``classify`` function automates the full classification:
    >>> from sympy import symbols
    >>> from mutation_game import classify
    >>> x, y = symbols('x y')
-   >>> classify(x**3 + y**2, (x, y))
+
+   >>> classify(x**3 + y**2, (x, y))    # uses mu and corank to determine type
    'A2'
-   >>> classify(x**2*y + y**3, (x, y))
+   >>> classify(x**2*y + y**3, (x, y))  # corank 2, mu=4 -> D4
    'D4'
-   >>> classify(x**3 + y**4, (x, y))
+   >>> classify(x**3 + y**4, (x, y))    # corank 2, mu=6, pure cube 3-jet -> E6
    'E6'
 
 How do we construct the coordinate change explicitly?
@@ -198,11 +201,15 @@ integrating from :math:`t = 0` to :math:`t = 1` gives :math:`\phi = \phi_1`.
    >>> from sympy import symbols, expand
    >>> from mutation_game import homotopy_equivalence
    >>> x, y = symbols('x y')
-   >>> f = x**3 + y**2
-   >>> g = x**3 + 5*y**2
-   >>> result = homotopy_equivalence(f, g, (x, y))
-   >>> result['coordinate_change']
+
+   >>> f = x**3 + y**2                           # source singularity
+   >>> g = x**3 + 5*y**2                          # target (same type A2)
+   >>> result = homotopy_equivalence(f, g, (x, y))  # find coord change
+
+   >>> result['coordinate_change']  # the map phi such that g(phi(x,y)) = f(x,y)
    {x: x, y: sqrt(5)*y/5}
+
+   >>> # verify: substituting phi into g recovers f
    >>> expand(g.subs(y, result['coordinate_change'][y]))
    x**3 + y**2
 
@@ -241,10 +248,14 @@ order by order via polynomial coordinate substitutions:
    >>> from sympy import symbols
    >>> from mutation_game import jet_reduce
    >>> x = symbols('x')
+
+   >>> # reduce x^3 + x^4 to A2 normal form u^3
+   >>> # by finding a coordinate change x = phi(u) that kills higher terms
    >>> result = jet_reduce(x**3 + x**4, x, 3)
-   >>> result['normal_form']
+
+   >>> result['normal_form']  # the target normal form
    u**3
-   >>> result['coordinate_change']    # x = u - u²/3 + u³/3 - ...
+   >>> result['coordinate_change']  # x = u - u^2/3 + u^3/3 - ...
    -35*u**4/81 + u**3/3 - u**2/3 + u
 
 **Method 3: The Splitting Lemma.**
@@ -256,12 +267,15 @@ Separates non-degenerate directions by completing the square:
    >>> from sympy import symbols
    >>> from mutation_game import splitting_lemma
    >>> x, y = symbols('x y')
+
+   >>> # split f = x^2 + x*y^2 + y^4 into non-degenerate + residual parts
    >>> result = splitting_lemma(x**2 + x*y**2 + y**4, (x, y))
-   >>> result['quadratic_part']
+
+   >>> result['quadratic_part']  # non-degenerate direction (Morse part)
    u0**2
-   >>> result['residual']
+   >>> result['residual']        # remaining singularity in fewer variables
    3*y**4/4
-   >>> result['corank']
+   >>> result['corank']          # number of degenerate directions
    1
 
 The function :math:`x^2 + xy^2 + y^4` splits into :math:`u_0^2 + \frac{3}{4}y^4`,
@@ -402,11 +416,16 @@ We walk through the full analysis of :math:`f(x, y) = x^4 + y^2` step by step.
 
 .. code-block:: pycon
 
-   >>> from sympy import *
-   >>> x, y = symbols('x y')
-   >>> f = x**4 + y**2
+   >>> from sympy import symbols, diff, solve
+   >>> x, y = symbols('x y')  # define symbolic variables
+
+   >>> f = x**4 + y**2  # the A3 singularity (in two variables)
+
+   >>> # compute partial derivatives
    >>> diff(f, x), diff(f, y)
    (4*x**3, 2*y)
+
+   >>> # find critical points: where both partials vanish
    >>> solve([diff(f, x), diff(f, y)], [x, y])
    [(0, 0)]
 
@@ -416,12 +435,16 @@ The only critical point is the origin.
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols
    >>> from mutation_game import milnor_number, corank, classify
-   >>> milnor_number(f, (x, y))
+   >>> x, y = symbols('x y')
+   >>> f = x**4 + y**2
+
+   >>> milnor_number(f, (x, y))  # dimension of the local algebra O/J(f)
    3
-   >>> corank(f, (x, y))
+   >>> corank(f, (x, y))         # number of zero eigenvalues of the Hessian
    1
-   >>> classify(f, (x, y))
+   >>> classify(f, (x, y))       # determine ADE type from mu and corank
    'A3'
 
 The Milnor number is 3 (the singularity splits into 3 Morse points), the
@@ -431,9 +454,9 @@ corank is 1 (one degenerate direction), and the type is :math:`A_3`.
 
 .. code-block:: pycon
 
-   >>> # J(f) = <4x^3, 2y>
+   >>> # The Jacobian ideal J(f) = <4x^3, 2y>
    >>> # Monomials not in the leading term ideal: {1, x, x^2}
-   >>> # dim O/(J(f)) = 3 = mu
+   >>> # Therefore dim O/(J(f)) = 3 = mu
 
 The local algebra :math:`\mathcal{O}_2 / \langle x^3, y \rangle` has basis
 :math:`\{1, x, x^2\}`, confirming :math:`\mu = 3`.
@@ -442,15 +465,19 @@ The local algebra :math:`\mathcal{O}_2 / \langle x^3, y \rangle` has basis
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols, diff, Rational, nsolve
+   >>> x, y = symbols('x y')
+
+   >>> # perturb f = x^4 + y^2 by adding lower-order terms
    >>> ft = x**4 - Rational(3, 4)*x**2 - Rational(1, 10)*x + y**2
-   >>> dft_dx = diff(ft, x)
+   >>> dft_dx = diff(ft, x)  # partial derivative of the perturbed function
    >>> dft_dx
    4*x**3 - 3*x/2 - 1/10
 
-   >>> # Find the 3 critical points numerically (y = 0)
+   >>> # find the 3 critical points numerically (setting y = 0)
    >>> for guess in [-1.0, 0.1, 0.8]:
-   ...     xc = nsolve(dft_dx, x, guess)
-   ...     vc = ft.subs([(x, xc), (y, 0)])
+   ...     xc = nsolve(dft_dx, x, guess)          # numerical root near guess
+   ...     vc = ft.subs([(x, xc), (y, 0)])         # critical value f(xc, 0)
    ...     print(f"  x = {float(xc):.4f}, f = {float(vc):.4f}")
      x = -0.5758, f = -0.0812
      x = -0.0675, f = 0.0034
@@ -477,7 +504,11 @@ which is the :math:`A_3` Dynkin diagram.
 .. code-block:: pycon
 
    >>> from mutation_game import MutationGame
+
+   >>> # create the A3 mutation game from the Dynkin diagram
    >>> game = MutationGame.from_dynkin("A3")
+
+   >>> # the Cartan matrix = negative of the intersection form
    >>> print(game.cartan_matrix())
    [[ 2 -1  0]
     [-1  2 -1]
@@ -488,8 +519,9 @@ This is exactly the negative of the intersection matrix:
 
 .. code-block:: pycon
 
+   >>> # enumerate all roots by BFS over mutation sequences
    >>> roots = game.calculate_roots()
-   >>> pos = [r for r in roots if all(v >= 0 for v in r)]
+   >>> pos = [r for r in roots if all(v >= 0 for v in r)]  # positive roots only
    >>> print(f"{len(pos)} positive roots, {len(roots)} total")
    6 positive roots, 12 total
 
@@ -499,6 +531,8 @@ The monodromy of the singularity is the Coxeter element
 .. code-block:: pycon
 
    >>> import numpy as np
+
+   >>> # the Coxeter element = product of all mutation matrices
    >>> M = game.mutation_matrix(0) @ game.mutation_matrix(1) @ game.mutation_matrix(2)
    >>> print(M)
    [[ 0  0 -1]
@@ -520,32 +554,37 @@ The vanishing cycles form a chain, giving the :math:`A_n` path graph.
 6. Worked Example: D\ :sub:`4` in Detail
 ------------------------------------------
 
-**Step 1: Verify singularity.**
+**Step 1: Verify singularity and compute invariants.**
 
 .. code-block:: pycon
 
    >>> from sympy import symbols, solve, diff, hessian
    >>> from mutation_game import milnor_number, corank, classify
-   >>> x, y = symbols('x y')
-   >>> f = x**2 * y + y**3
+   >>> x, y = symbols('x y')  # define symbolic variables
+
+   >>> f = x**2 * y + y**3  # the D4 singularity
+
+   >>> # find critical points
    >>> solve([diff(f, x), diff(f, y)], [x, y])
    [(0, 0)]
-   >>> milnor_number(f, (x, y))
+
+   >>> milnor_number(f, (x, y))  # dimension of local algebra
    4
-   >>> corank(f, (x, y))
+   >>> corank(f, (x, y))         # both Hessian eigenvalues are zero
    2
-   >>> classify(f, (x, y))
+   >>> classify(f, (x, y))       # mu=4, corank=2 -> D4
    'D4'
 
-Corank 2 (both Hessian eigenvalues are zero):
+**Step 2: Inspect the Hessian.**
 
 .. code-block:: pycon
 
+   >>> # compute the Hessian matrix of second derivatives
    >>> H = hessian(f, [x, y])
+
+   >>> # evaluate at the origin: all entries are zero (corank = 2)
    >>> H.subs([(x, 0), (y, 0)])
    Matrix([[0, 0], [0, 0]])
-
-**Step 2: The 3-jet.**
 
 The :math:`D_4` singularity is distinguished from :math:`A_3` by its corank.
 Its 3-jet :math:`x^2 y + y^3 = y(x^2 + y^2)` has a **repeated factor** in
@@ -557,12 +596,18 @@ Its 3-jet :math:`x^2 y + y^3 = y(x^2 + y^2)` has a **repeated factor** in
 
    >>> from sympy import symbols, diff, solve, Rational, im
    >>> x, y = symbols('x y')
-   >>> ft = x**2*y + y**3 - Rational(1,5)*y
+
+   >>> # perturb to split the singularity into 4 Morse points
+   >>> ft = x**2*y + y**3 - Rational(1, 5)*y
+
+   >>> # solve for critical points: set both partials to zero
    >>> sys = [diff(ft, x), diff(ft, y)]
    >>> crits = solve(sys, [x, y])
+
+   >>> # filter real solutions and print their positions and critical values
    >>> for c in crits:
    ...     if im(c[0]) == 0 and im(c[1]) == 0:
-   ...         v = ft.subs([(x, c[0]), (y, c[1])])
+   ...         v = ft.subs([(x, c[0]), (y, c[1])])  # critical value
    ...         print(f"  ({float(c[0]):.4f}, {float(c[1]):.4f}), f = {float(v):.4f}")
      (0.0000, -0.2582), f = 0.0344
      (0.0000, 0.2582), f = -0.0344
@@ -578,14 +623,20 @@ critical value, reflecting the fork in the :math:`D_4` diagram.
 .. code-block:: pycon
 
    >>> from mutation_game import MutationGame
+
+   >>> # create D4 from its Dynkin diagram name
    >>> game = MutationGame.from_dynkin("D4")
+
+   >>> # adjacency matrix: node 1 is the hub connecting to 0, 2, and 3
    >>> print(game.adj)
    [[0 1 0 0]
     [1 0 1 1]
     [0 1 0 0]
     [0 1 0 0]]
+
+   >>> # compute the full root system
    >>> roots = game.calculate_roots()
-   >>> pos = [r for r in roots if all(v >= 0 for v in r)]
+   >>> pos = [r for r in roots if all(v >= 0 for v in r)]  # positive roots
    >>> print(f"{len(pos)} positive roots, {len(roots)} total")
    12 positive roots, 24 total
 
@@ -607,12 +658,14 @@ The exceptional cases:
    >>> from sympy import symbols
    >>> from mutation_game import milnor_number, corank, classify
    >>> x, y = symbols('x y')
+
+   >>> # classify all three exceptional singularities
    >>> for name, f_expr in [('E6', x**3 + y**4),
    ...                       ('E7', x**3 + x*y**3),
    ...                       ('E8', x**3 + y**5)]:
-   ...     mu = milnor_number(f_expr, (x, y))
-   ...     cr = corank(f_expr, (x, y))
-   ...     tp = classify(f_expr, (x, y))
+   ...     mu = milnor_number(f_expr, (x, y))   # local algebra dimension
+   ...     cr = corank(f_expr, (x, y))           # Hessian corank
+   ...     tp = classify(f_expr, (x, y))         # ADE type
    ...     print(f"  {name}: f = {f_expr}, mu = {mu}, corank = {cr}, type = {tp}")
      E6: f = x**3 + y**4, mu = 6, corank = 2, type = E6
      E7: f = x**3 + x*y**3, mu = 7, corank = 2, type = E7
