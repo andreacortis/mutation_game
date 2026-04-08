@@ -19,4 +19,4 @@ __all__ = [
     "jet_reduce",
     "homotopy_equivalence",
 ]
-__version__ = "0.1.2"
+__version__ = "0.1.3"
