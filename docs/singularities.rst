@@ -130,6 +130,9 @@ The corank separates the families immediately:
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols
+   >>> from mutation_game import corank
+   >>> x, y = symbols('x y')
    >>> corank(x**3 + y**2, (x, y))    # A2: one degenerate direction
    1
    >>> corank(x**2*y + y**3, (x, y))  # D4: two degenerate directions
@@ -154,6 +157,9 @@ The ``classify`` function automates the full classification:
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols
+   >>> from mutation_game import classify
+   >>> x, y = symbols('x y')
    >>> classify(x**3 + y**2, (x, y))
    'A2'
    >>> classify(x**2*y + y**3, (x, y))
@@ -189,8 +195,9 @@ integrating from :math:`t = 0` to :math:`t = 1` gives :math:`\phi = \phi_1`.
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols, expand
    >>> from mutation_game import homotopy_equivalence
-   >>> from sympy import expand
+   >>> x, y = symbols('x y')
    >>> f = x**3 + y**2
    >>> g = x**3 + 5*y**2
    >>> result = homotopy_equivalence(f, g, (x, y))
@@ -231,7 +238,9 @@ order by order via polynomial coordinate substitutions:
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols
    >>> from mutation_game import jet_reduce
+   >>> x = symbols('x')
    >>> result = jet_reduce(x**3 + x**4, x, 3)
    >>> result['normal_form']
    u**3
@@ -244,7 +253,9 @@ Separates non-degenerate directions by completing the square:
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols
    >>> from mutation_game import splitting_lemma
+   >>> x, y = symbols('x y')
    >>> result = splitting_lemma(x**2 + x*y**2 + y**4, (x, y))
    >>> result['quadratic_part']
    u0**2
@@ -478,7 +489,7 @@ This is exactly the negative of the intersection matrix:
 .. code-block:: pycon
 
    >>> roots = game.calculate_roots()
-   >>> pos = [r for r in roots if all(x >= 0 for x in r)]
+   >>> pos = [r for r in roots if all(v >= 0 for v in r)]
    >>> print(f"{len(pos)} positive roots, {len(roots)} total")
    6 positive roots, 12 total
 
@@ -513,6 +524,9 @@ The vanishing cycles form a chain, giving the :math:`A_n` path graph.
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols, solve, diff, hessian
+   >>> from mutation_game import milnor_number, corank, classify
+   >>> x, y = symbols('x y')
    >>> f = x**2 * y + y**3
    >>> solve([diff(f, x), diff(f, y)], [x, y])
    [(0, 0)]
@@ -541,7 +555,8 @@ Its 3-jet :math:`x^2 y + y^3 = y(x^2 + y^2)` has a **repeated factor** in
 
 .. code-block:: pycon
 
-   >>> from sympy import Rational, I, im, re
+   >>> from sympy import symbols, diff, solve, Rational, im
+   >>> x, y = symbols('x y')
    >>> ft = x**2*y + y**3 - Rational(1,5)*y
    >>> sys = [diff(ft, x), diff(ft, y)]
    >>> crits = solve(sys, [x, y])
@@ -562,6 +577,7 @@ critical value, reflecting the fork in the :math:`D_4` diagram.
 
 .. code-block:: pycon
 
+   >>> from mutation_game import MutationGame
    >>> game = MutationGame.from_dynkin("D4")
    >>> print(game.adj)
    [[0 1 0 0]
@@ -569,7 +585,7 @@ critical value, reflecting the fork in the :math:`D_4` diagram.
     [0 1 0 0]
     [0 1 0 0]]
    >>> roots = game.calculate_roots()
-   >>> pos = [r for r in roots if all(x >= 0 for x in r)]
+   >>> pos = [r for r in roots if all(v >= 0 for v in r)]
    >>> print(f"{len(pos)} positive roots, {len(roots)} total")
    12 positive roots, 24 total
 
@@ -588,6 +604,9 @@ The exceptional cases:
 
 .. code-block:: pycon
 
+   >>> from sympy import symbols
+   >>> from mutation_game import milnor_number, corank, classify
+   >>> x, y = symbols('x y')
    >>> for name, f_expr in [('E6', x**3 + y**4),
    ...                       ('E7', x**3 + x*y**3),
    ...                       ('E8', x**3 + y**5)]:
