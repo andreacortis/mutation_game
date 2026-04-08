@@ -334,30 +334,20 @@ The root system of :math:`A_3` consists of 12 vectors :math:`e_i - e_j`
 the midpoint of every edge.
 
 The mutation graph of the full :math:`A_3` root system (both positive and
-negative roots) is shown below on the left. On the right, the same 12 roots
-are realized as vertices of the cuboctahedron in 3D:
+negative roots), with 12 roots and 15 mutation edges:
+
+.. image:: _static/a3_all_roots.png
+   :width: 100%
+   :alt: A3 full mutation graph -- 12 roots, 15 edges
+
+The same 12 roots realized as vertices of the cuboctahedron in 3D
+(`open fullscreen <_static/roots_viewer.html>`__):
 
 .. raw:: html
 
-   <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:stretch;">
-     <div style="flex:1; min-width:300px;">
-       <img src="_static/a3_all_roots.png" alt="A3 full mutation graph"
-            style="width:100%; border:1px solid #444; border-radius:6px;">
-       <p style="text-align:center; font-size:12px; color:#888; margin-top:4px;">
-         A<sub>3</sub> mutation graph &mdash; 12 roots, 15 edges.<br>
-         Positive roots (top) and negative roots (bottom) colored by node.
-       </p>
-     </div>
-     <div style="flex:1; min-width:300px;">
-       <iframe src="_static/roots_viewer.html"
-         style="width:100%; height:420px; border:1px solid #444; border-radius:6px; background:#1a1a2e;"
-         loading="lazy" allowfullscreen></iframe>
-       <p style="text-align:center; font-size:12px; color:#888; margin-top:4px;">
-         Interactive 3D &mdash; click and drag to rotate, scroll to zoom.
-         <a href="_static/roots_viewer.html">Open fullscreen</a>
-       </p>
-     </div>
-   </div>
+   <iframe src="_static/roots_viewer.html"
+     style="width:100%; height:420px; border:1px solid #444; border-radius:6px; background:#1a1a2e;"
+     loading="lazy" allowfullscreen></iframe>
 
 Each vertex of the cuboctahedron is a root :math:`e_i - e_j`, colored by
 the **dominant simple root** using the same tab10 palette as the mutation
