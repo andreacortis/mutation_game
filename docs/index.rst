@@ -9,11 +9,17 @@ mutations and visualizes the mutation graph.
 
 .. toctree::
    :maxdepth: 2
+   :caption: The Code
 
-   background
-   classification_proof
-   singularities
-   platonic_solids
    getting_started
    explorations
    api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: The Mathematics
+
+   background
+   platonic_solids
+   singularities
+   classification_proof
