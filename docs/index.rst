@@ -13,6 +13,7 @@ mutations and visualizes the mutation graph.
    background
    classification_proof
    singularities
+   platonic_solids
    getting_started
    explorations
    api
