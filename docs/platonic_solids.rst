@@ -324,6 +324,30 @@ We can verify the Dynkin diagrams and root counts for all these types:
      E7 (Cube/Octahedron): 63 positive roots, 126 total
      E8 (Dodecahedron/Icosahedron): 120 positive roots, 240 total
 
+Root systems as 3D polytopes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The root system of :math:`A_3` consists of 12 vectors :math:`e_i - e_j`
+(:math:`i \neq j`) in :math:`\mathbb{R}^4`, projected onto the hyperplane
+:math:`\sum x_i = 0`. These 12 points form the vertices of a
+**cuboctahedron** -- the Archimedean solid obtained by truncating a cube at
+the midpoint of every edge.
+
+**Interactive viewer** -- positive roots in red, negative in teal, simple
+roots highlighted in gold
+(`open fullscreen <_static/roots_viewer.html>`__):
+
+.. raw:: html
+
+   <iframe src="_static/roots_viewer.html"
+     style="width:100%; height:420px; border:1px solid #444; border-radius:6px; background:#1a1a2e;"
+     loading="lazy" allowfullscreen></iframe>
+
+Edges connect roots whose difference is itself a root (i.e. they are adjacent
+in the root system). The cuboctahedral geometry reflects the :math:`S_4`
+symmetry of the Weyl group -- the same group as the rotation group of the
+cube/octahedron.
+
 .. note::
 
    The 240 roots of :math:`E_8` can be realized as vectors in
