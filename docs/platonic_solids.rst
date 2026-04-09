@@ -404,53 +404,91 @@ grid. Let's do it:
    :align: center
    :alt: A2 roots plotted in the simple root basis -- distorted
 
-The roots form a *rectangle* — but that can't be right. A root system with
-:math:`S_3` symmetry (3-fold rotational symmetry) should look like a hexagon,
-not a rectangle. Something is wrong with our picture.
+The roots form a *rectangle*. The two simple roots :math:`\alpha_0 = (1,0)`
+and :math:`\alpha_1 = (0,1)` appear to be at a **90-degree angle** (the red
+dashed arc). But should we trust this picture?
 
-The problem is that the two simple roots :math:`\alpha_0 = (1,0)` and
-:math:`\alpha_1 = (0,1)` appear to be at a **90-degree angle** in this plot
-(the red dashed arc). But the Cartan matrix tells us they should meet at
-**120 degrees**. Here's why.
+When we plot points on a grid, we are implicitly using the **standard dot
+product** to measure angles and distances: :math:`u \cdot v = u_1 v_1 + u_2 v_2`.
+In the standard dot product, :math:`(1,0)` and :math:`(0,1)` are perpendicular
+by definition. But the root space has its own natural way of measuring angles,
+given by the **Cartan matrix**. Let's see what it says.
 
-**The inner product and angles.** The Cartan matrix defines a natural
-**inner product** (a way to measure angles and lengths) on the root space.
-Given two vectors :math:`u` and :math:`v`, their inner product is:
+**The Cartan inner product.** Recall from the :doc:`background` that the
+Cartan matrix :math:`C = 2I - A^T` encodes the structure of the root system.
+We can use it to define an **inner product** — a generalization of the dot
+product that "knows about" the geometry of the roots.
+
+Given two vectors :math:`u` and :math:`v` (expressed in the simple root
+basis), their Cartan inner product is:
 
 .. math::
 
    \langle u, v \rangle = u^T \, C \, v
 
-where :math:`C` is the Cartan matrix. This is a generalization of the familiar
-dot product :math:`u \cdot v = u_1 v_1 + u_2 v_2`. The difference is that the
-Cartan matrix "mixes" the components, accounting for the fact that
-:math:`\alpha_0` and :math:`\alpha_1` are not perpendicular.
+This looks like the dot product :math:`u \cdot v`, but with the matrix
+:math:`C` inserted in the middle. When :math:`C` is the identity matrix, this
+reduces to the ordinary dot product. When :math:`C` has off-diagonal entries
+(as it does for :math:`A_2`), it "mixes" the components, changing how angles
+are measured.
 
 For :math:`A_2`, the Cartan matrix is
-:math:`C = \bigl(\begin{smallmatrix} 2 & -1 \\ -1 & 2 \end{smallmatrix}\bigr)`,
-so:
+:math:`C = \bigl(\begin{smallmatrix} 2 & -1 \\ -1 & 2 \end{smallmatrix}\bigr)`.
+Let's compute the inner products of the simple roots step by step.
+
+**Length of** :math:`\alpha_0 = (1, 0)`:
 
 .. math::
 
    \langle \alpha_0, \alpha_0 \rangle
-     = (1, 0) \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix} \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+     = \begin{pmatrix} 1 & 0 \end{pmatrix}
+       \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}
+       \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+     = \begin{pmatrix} 1 & 0 \end{pmatrix}
+       \begin{pmatrix} 2 \\ -1 \end{pmatrix}
      = 2
+
+**Length of** :math:`\alpha_1 = (0, 1)`:
 
 .. math::
 
    \langle \alpha_1, \alpha_1 \rangle
-     = (0, 1) \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix} \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+     = \begin{pmatrix} 0 & 1 \end{pmatrix}
+       \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}
+       \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+     = \begin{pmatrix} 0 & 1 \end{pmatrix}
+       \begin{pmatrix} -1 \\ 2 \end{pmatrix}
      = 2
+
+Both simple roots have the same length (:math:`\sqrt{2}` in the Cartan
+metric). So far, same as the standard dot product would give.
+
+**Inner product between** :math:`\alpha_0` **and** :math:`\alpha_1`:
 
 .. math::
 
    \langle \alpha_0, \alpha_1 \rangle
-     = (1, 0) \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix} \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+     = \begin{pmatrix} 1 & 0 \end{pmatrix}
+       \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}
+       \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+     = \begin{pmatrix} 1 & 0 \end{pmatrix}
+       \begin{pmatrix} -1 \\ 2 \end{pmatrix}
      = -1
 
-The **angle** between two vectors is given by the formula
-:math:`\cos\theta = \frac{\langle u, v \rangle}{\sqrt{\langle u, u \rangle \cdot \langle v, v \rangle}}`,
-so:
+Here is the key difference: the standard dot product gives
+:math:`(1,0) \cdot (0,1) = 0` (perpendicular), but the Cartan inner product
+gives :math:`-1` (not perpendicular at all).
+
+**The angle.** The angle :math:`\theta` between two vectors satisfies:
+
+.. math::
+
+   \cos\theta
+     = \frac{\langle u, v \rangle}
+            {\sqrt{\langle u, u \rangle \cdot \langle v, v \rangle}}
+
+This is the same formula as for the ordinary dot product, but using the
+Cartan inner product. Plugging in:
 
 .. math::
 
@@ -458,19 +496,57 @@ so:
    \quad\Longrightarrow\quad
    \theta = 120°
 
-The simple roots meet at 120 degrees, not 90. Our :math:`\mathbb{R}^2` plot
-used the standard dot product (which treats the axes as perpendicular), so
-it showed the wrong angle. The simple root basis is **not orthonormal** under
-the Cartan inner product — it's like drawing a map on graph paper when the
-actual terrain is tilted.
+The simple roots actually meet at **120 degrees**, not 90. Our
+:math:`\mathbb{R}^2` plot used the standard dot product to draw the grid,
+which assumes the basis vectors are perpendicular. Since they aren't
+(under the Cartan metric), the picture is distorted.
 
-**Step 3: The standard embedding in** :math:`\mathbb{R}^3`.
+**Step 3: Finding a space where the geometry is honest.**
 
-To see the *true shape*, we embed the roots in :math:`\mathbb{R}^{n+1}`
-(one dimension more than the number of nodes), where the ordinary dot product
-:math:`u \cdot v = u_1 v_1 + u_2 v_2 + u_3 v_3` automatically gives the
-correct Cartan inner product. For :math:`A_2` (2 nodes), we work in
-:math:`\mathbb{R}^3`. Define three unit vectors along the coordinate axes:
+We want to draw the roots in a way that shows the true angles and distances.
+That means we need to find concrete vectors in some :math:`\mathbb{R}^m`
+(with the ordinary dot product) whose dot products match the Cartan inner
+products. Specifically, we need two vectors :math:`v_0, v_1 \in \mathbb{R}^m`
+such that:
+
+.. math::
+
+   v_0 \cdot v_0 = 2, \qquad v_1 \cdot v_1 = 2, \qquad v_0 \cdot v_1 = -1
+
+Can we do this in :math:`\mathbb{R}^2`? We need two vectors of length
+:math:`\sqrt{2}` at a 120-degree angle. Yes — for example
+:math:`v_0 = (\sqrt{2}, 0)` and :math:`v_1 = (-\frac{1}{\sqrt{2}}, \frac{\sqrt{6}}{2})`.
+That works but looks ugly.
+
+There is a much cleaner choice in :math:`\mathbb{R}^3`. Consider the
+**differences of standard basis vectors**:
+
+.. math::
+
+   v_0 = e_1 - e_2 = (1, -1, 0), \qquad v_1 = e_2 - e_3 = (0, 1, -1)
+
+Check the dot products (ordinary dot product in :math:`\mathbb{R}^3`):
+
+.. math::
+
+   v_0 \cdot v_0 = 1 + 1 + 0 = 2 \quad\checkmark
+
+.. math::
+
+   v_1 \cdot v_1 = 0 + 1 + 1 = 2 \quad\checkmark
+
+.. math::
+
+   v_0 \cdot v_1 = 0 + (-1) + 0 = -1 \quad\checkmark
+
+All three match. So the embedding :math:`\alpha_0 \mapsto e_1 - e_2`,
+:math:`\alpha_1 \mapsto e_2 - e_3` is not arbitrary — it is the unique (up to
+rotation) simplest embedding where the ordinary dot product reproduces the
+Cartan inner product. We use :math:`\mathbb{R}^3` (not :math:`\mathbb{R}^2`
+or :math:`\mathbb{R}^{17}`) because 3 = n+1 is the smallest dimension where
+this clean construction works for :math:`A_n`.
+
+Now define the standard basis of :math:`\mathbb{R}^3`:
 
 .. math::
 
