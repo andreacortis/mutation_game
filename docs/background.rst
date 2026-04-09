@@ -233,6 +233,62 @@ The simple reflection at node *k* acts on the weight lattice as:
 which is precisely the mutation rule:
 :math:`v_k \mapsto -v_k + \sum_{j \sim k} v_j`.
 
+Why not embed first?
+--------------------
+
+A natural question arises: if the roots ultimately live in
+:math:`\mathbb{R}^{n+1}` (for :math:`A_n`) or some other Euclidean space, why
+not start there? Why compute in the abstract simple root basis and embed later?
+
+The traditional approach in Lie theory does exactly that:
+
+1. Start with the Cartan matrix :math:`C`
+2. Find vectors :math:`\alpha_1, \ldots, \alpha_n` in :math:`\mathbb{R}^m`
+   whose dot products match :math:`C` (the embedding)
+3. Define reflections
+   :math:`s_k(v) = v - \frac{2\, v \cdot \alpha_k}{\alpha_k \cdot \alpha_k}\, \alpha_k`
+   acting on :math:`\mathbb{R}^m`
+4. Generate the root system by applying reflections to the simple roots
+
+This works, and the geometry is visible from the start. But Wildberger's
+mutation game takes the opposite path:
+
+1. Start with the adjacency matrix :math:`A` (a graph — just 0s and 1s)
+2. Define mutation matrices :math:`M_k` (integer entries, no square roots)
+3. BFS in :math:`\mathbb{R}^n` to enumerate all roots as **integer vectors**
+4. Embed into Euclidean space later, *if* you want to see the geometry
+
+The mutation game approach has several advantages:
+
+- **Minimal dimension.** The computation happens in :math:`\mathbb{R}^n`
+  (one coordinate per node), not :math:`\mathbb{R}^{n+1}` or higher. For
+  :math:`A_2` we work in :math:`\mathbb{R}^2`, not :math:`\mathbb{R}^3`.
+
+- **Pure integer arithmetic.** The mutation matrices have integer entries, so
+  all roots have integer coordinates in the simple root basis. No irrational
+  numbers, no floating point, no rounding errors.
+
+- **No embedding needed.** To compute the root system, its size, the mutation
+  paths, or to check finiteness (via the Cartan eigenvalues), you never need
+  to choose an embedding. The combinatorics are self-contained.
+
+- **Works for any graph.** For the ADE types, the classical
+  :math:`e_i - e_j` embedding is well-known. But for an arbitrary graph (or
+  directed multigraph), finding an embedding means solving for vectors with
+  prescribed dot products — a harder problem. The mutation game just runs the
+  BFS regardless.
+
+The price is that the geometry is hidden: the roots :math:`(1, 0)`,
+:math:`(0, 1)`, :math:`(1, 1)` don't look like a hexagon until you embed
+them (as explained in :doc:`platonic_solids`). But the combinatorial content —
+how many roots, which mutations connect them, the Weyl group structure — is
+all there in the integer vectors.
+
+Both approaches produce the same root system. The mutation game is the
+computational workhorse; the Euclidean embedding is for geometric
+visualization. This library uses the mutation game for computation and
+provides the embedding tools when you want to see the shapes.
+
 The mutation graph
 ------------------
 
