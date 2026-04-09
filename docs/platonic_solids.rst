@@ -394,20 +394,83 @@ So the mutation game has produced 6 roots in :math:`\mathbb{R}^2`:
 abstract vectors in the **simple root basis**. The question is: what shape
 do they make?
 
-**Step 2: The standard embedding in** :math:`\mathbb{R}^3`.
+**Step 2: Try plotting in** :math:`\mathbb{R}^2` **directly.**
 
-We could plot these 6 vectors directly in :math:`\mathbb{R}^2`, but the
-result looks skewed — the simple roots :math:`(1,0)` and :math:`(0,1)` appear
-to be at a 90-degree angle, even though the Cartan matrix tells us they
-should meet at 120 degrees (since
-:math:`\langle \alpha_0, \alpha_1 \rangle = C_{01} = -1`, which corresponds
-to an angle of :math:`2\pi/3`). The simple root basis is not orthonormal, so
-raw coordinates distort the geometry.
+These are vectors in :math:`\mathbb{R}^2`, so we can just plot them on a
+grid. Let's do it:
+
+.. image:: _static/a2_skewed.png
+   :width: 70%
+   :align: center
+   :alt: A2 roots plotted in the simple root basis -- distorted
+
+The roots form a *rectangle* — but that can't be right. A root system with
+:math:`S_3` symmetry (3-fold rotational symmetry) should look like a hexagon,
+not a rectangle. Something is wrong with our picture.
+
+The problem is that the two simple roots :math:`\alpha_0 = (1,0)` and
+:math:`\alpha_1 = (0,1)` appear to be at a **90-degree angle** in this plot
+(the red dashed arc). But the Cartan matrix tells us they should meet at
+**120 degrees**. Here's why.
+
+**The inner product and angles.** The Cartan matrix defines a natural
+**inner product** (a way to measure angles and lengths) on the root space.
+Given two vectors :math:`u` and :math:`v`, their inner product is:
+
+.. math::
+
+   \langle u, v \rangle = u^T \, C \, v
+
+where :math:`C` is the Cartan matrix. This is a generalization of the familiar
+dot product :math:`u \cdot v = u_1 v_1 + u_2 v_2`. The difference is that the
+Cartan matrix "mixes" the components, accounting for the fact that
+:math:`\alpha_0` and :math:`\alpha_1` are not perpendicular.
+
+For :math:`A_2`, the Cartan matrix is
+:math:`C = \bigl(\begin{smallmatrix} 2 & -1 \\ -1 & 2 \end{smallmatrix}\bigr)`,
+so:
+
+.. math::
+
+   \langle \alpha_0, \alpha_0 \rangle
+     = (1, 0) \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix} \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+     = 2
+
+.. math::
+
+   \langle \alpha_1, \alpha_1 \rangle
+     = (0, 1) \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix} \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+     = 2
+
+.. math::
+
+   \langle \alpha_0, \alpha_1 \rangle
+     = (1, 0) \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix} \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+     = -1
+
+The **angle** between two vectors is given by the formula
+:math:`\cos\theta = \frac{\langle u, v \rangle}{\sqrt{\langle u, u \rangle \cdot \langle v, v \rangle}}`,
+so:
+
+.. math::
+
+   \cos\theta = \frac{-1}{\sqrt{2 \cdot 2}} = -\frac{1}{2}
+   \quad\Longrightarrow\quad
+   \theta = 120°
+
+The simple roots meet at 120 degrees, not 90. Our :math:`\mathbb{R}^2` plot
+used the standard dot product (which treats the axes as perpendicular), so
+it showed the wrong angle. The simple root basis is **not orthonormal** under
+the Cartan inner product — it's like drawing a map on graph paper when the
+actual terrain is tilted.
+
+**Step 3: The standard embedding in** :math:`\mathbb{R}^3`.
 
 To see the *true shape*, we embed the roots in :math:`\mathbb{R}^{n+1}`
-(one dimension more than the number of nodes), where the symmetry becomes
-manifest. For :math:`A_2` (2 nodes), we work in :math:`\mathbb{R}^3`. Define
-three unit vectors along the coordinate axes:
+(one dimension more than the number of nodes), where the ordinary dot product
+:math:`u \cdot v = u_1 v_1 + u_2 v_2 + u_3 v_3` automatically gives the
+correct Cartan inner product. For :math:`A_2` (2 nodes), we work in
+:math:`\mathbb{R}^3`. Define three unit vectors along the coordinate axes:
 
 .. math::
 
@@ -423,7 +486,7 @@ The **simple roots** of :math:`A_2` are embedded as:
 These are the two vectors that correspond to the nodes of the Dynkin diagram.
 They are the "building blocks" that generate all the roots.
 
-**Step 3: Translate all 6 roots into** :math:`\mathbb{R}^3`.
+**Step 4: Translate all 6 roots into** :math:`\mathbb{R}^3`.
 
 Each root :math:`(a, b)` in the simple root basis means
 :math:`a \cdot \alpha_0 + b \cdot \alpha_1`:
@@ -448,7 +511,7 @@ happened to produce precisely the vectors that can be written as
 Each negative root is the opposite of a positive root:
 :math:`-(e_1 - e_2) = e_2 - e_1`.
 
-**Step 4: All roots lie on a plane.** Check the coordinates — every root
+**Step 5: All roots lie on a plane.** Check the coordinates — every root
 has components that sum to zero:
 
 .. math::
@@ -459,7 +522,7 @@ This means all 6 vectors lie on the plane :math:`x + y + z = 0` inside
 :math:`\mathbb{R}^3`. This plane passes through the origin and is
 2-dimensional, so we can draw the roots as points on a flat sheet of paper.
 
-**Step 5: See the hexagon.** When we project these 6 points onto the plane,
+**Step 6: See the hexagon.** When we project these 6 points onto the plane,
 they are all at the same distance from the origin (:math:`\sqrt{2}`), and
 equally spaced at 60-degree intervals. They form a perfect **regular
 hexagon**:
@@ -474,7 +537,7 @@ larger dots with white borders) are adjacent vertices of the hexagon. The
 third positive root :math:`e_1 - e_3` is their sum — it sits between them.
 The three negative roots sit on the opposite side.
 
-**Step 6: The symmetry group.** The hexagon has the symmetry of an
+**Step 7: The symmetry group.** The hexagon has the symmetry of an
 **equilateral triangle** (the triangle formed by the 3 positive roots). This
 symmetry group is :math:`S_3` — the group of all permutations of 3 objects —
 which has :math:`3! = 6` elements (3 rotations + 3 reflections).
