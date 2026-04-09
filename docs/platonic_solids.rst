@@ -396,12 +396,18 @@ do they make?
 
 **Step 2: The standard embedding in** :math:`\mathbb{R}^3`.
 
-To see the geometry, we need to embed these abstract vectors into a real
-coordinate space. The standard way to do this for :math:`A_n` is to work in
-:math:`\mathbb{R}^{n+1}` (one dimension more than the number of nodes).
+We could plot these 6 vectors directly in :math:`\mathbb{R}^2`, but the
+result looks skewed — the simple roots :math:`(1,0)` and :math:`(0,1)` appear
+to be at a 90-degree angle, even though the Cartan matrix tells us they
+should meet at 120 degrees (since
+:math:`\langle \alpha_0, \alpha_1 \rangle = C_{01} = -1`, which corresponds
+to an angle of :math:`2\pi/3`). The simple root basis is not orthonormal, so
+raw coordinates distort the geometry.
 
-For :math:`A_2` (2 nodes), we work in :math:`\mathbb{R}^3`. Define three
-unit vectors along the coordinate axes:
+To see the *true shape*, we embed the roots in :math:`\mathbb{R}^{n+1}`
+(one dimension more than the number of nodes), where the symmetry becomes
+manifest. For :math:`A_2` (2 nodes), we work in :math:`\mathbb{R}^3`. Define
+three unit vectors along the coordinate axes:
 
 .. math::
 
