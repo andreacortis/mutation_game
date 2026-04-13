@@ -145,16 +145,146 @@ Whether the root system is finite depends on the graph:
 A complete proof that the ADE diagrams are the *only* simply-laced finite-type
 graphs is given in :doc:`classification_proof`.
 
+Where does the Cartan matrix come from?
+-----------------------------------------
+
+The formula :math:`C = 2I - A^T` can look like it was pulled out of a hat.
+Why :math:`2I - A^T` and not, say, :math:`I + A` or :math:`3I - 2A`? The
+answer is that the Cartan matrix is not a choice — it is **forced** by a
+natural question about symmetry.
+
+**The question.** Is there a quadratic form :math:`Q(v) = v^T B\, v` (a way
+to measure "size") that is **preserved by every mutation**? That is, a
+symmetric matrix :math:`B` such that:
+
+.. math::
+
+   M_k^T \, B \, M_k = B \qquad \text{for all } k
+
+If such a :math:`B` exists, then mutations are "rotations" with respect to
+:math:`B` — they move vectors around without changing their :math:`B`-length.
+This is exactly the condition for the Weyl group to be a group of symmetries
+of a geometric shape (the root polytope).
+
+**The answer for A2.** Let's solve this concretely. For :math:`A_2` the
+mutation matrices are:
+
+.. math::
+
+   M_0 = \begin{pmatrix} -1 & 1 \\ 0 & 1 \end{pmatrix}, \qquad
+   M_1 = \begin{pmatrix} 1 & 0 \\ 1 & -1 \end{pmatrix}
+
+We seek a symmetric :math:`B = \bigl(\begin{smallmatrix} a & b \\ b & c \end{smallmatrix}\bigr)`
+satisfying :math:`M_0^T B M_0 = B` and :math:`M_1^T B M_1 = B`. This gives a
+system of equations whose solution (up to an overall scale) is:
+
+.. math::
+
+   B = t \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}
+
+for an arbitrary constant :math:`t > 0`. We can verify this with sympy:
+
+.. code-block:: pycon
+
+   >>> from sympy import symbols, Matrix, solve
+   >>> a, b, c = symbols('a b c')
+   >>> B = Matrix([[a, b], [b, c]])
+   >>> M0 = Matrix([[-1, 1], [0, 1]])
+   >>> M1 = Matrix([[1, 0], [1, -1]])
+
+   >>> # Solve M0^T B M0 = B and M1^T B M1 = B
+   >>> eqs = []
+   >>> for M in [M0, M1]:
+   ...     diff = M.T * B * M - B
+   ...     for i in range(2):
+   ...         for j in range(i, 2):
+   ...             eqs.append(diff[i, j])
+   >>> sol = solve(eqs, [a, b, c])
+   >>> print(sol)
+   {a: c, b: -c/2}
+
+   >>> # So B = c * [[1, -1/2], [-1/2, 1]] = (c/2) * [[2, -1], [-1, 2]]
+   >>> print(B.subs(sol).subs(c, 2))
+   Matrix([[2, -1], [-1, 2]])
+
+The **unique** preserved quadratic form (up to scale) is the Cartan matrix
+:math:`C = 2I - A`:
+
+.. math::
+
+   C = \begin{pmatrix} 2 & -1 \\ -1 & 2 \end{pmatrix}
+
+This works for any simply-laced type. For :math:`A_3`:
+
+.. code-block:: pycon
+
+   >>> from mutation_game import MutationGame
+   >>> import numpy as np
+   >>> game = MutationGame.from_dynkin("A3")
+
+   >>> # Verify: M_k^T C M_k = C for all k
+   >>> C = game.cartan_matrix()
+   >>> for k in range(3):
+   ...     M = game.mutation_matrix(k)
+   ...     print(f"  M_{k}^T C M_{k} == C? {np.allclose(M.T @ C @ M, C)}")
+     M_0^T C M_0 == C? True
+     M_1^T C M_1 == C? True
+     M_2^T C M_2 == C? True
+
+**For non-simply-laced types** (B, C, F, G), the Cartan matrix
+:math:`C = 2I - A^T` is not symmetric, so it cannot directly be a quadratic
+form. But there is still a unique (up to scale) **symmetric** preserved form
+:math:`B = D \cdot C`, where :math:`D` is a diagonal matrix that accounts for
+the different root lengths:
+
+.. code-block:: pycon
+
+   >>> game = MutationGame.from_dynkin("B2")
+   >>> C = game.cartan_matrix()
+   >>> print("Cartan (non-symmetric):"); print(C)
+   Cartan (non-symmetric):
+   [[ 2 -1]
+    [-2  2]]
+
+   >>> # The preserved symmetric form is D @ C with D = diag(2, 1)
+   >>> D = np.diag([2, 1])
+   >>> B = D @ C
+   >>> print("Preserved form B = D C:"); print(B)
+   Preserved form B = D C:
+   [[ 4 -2]
+    [-2  2]]
+
+   >>> # Verify: M_k^T B M_k = B
+   >>> for k in range(2):
+   ...     M = game.mutation_matrix(k)
+   ...     print(f"  M_{k}^T B M_{k} == B? {np.allclose(M.T @ B @ M, B)}")
+     M_0^T B M_0 == B? True
+     M_1^T B M_1 == B? True
+
+The diagonal entries of :math:`D` are proportional to the squared root
+lengths: :math:`d_0 = 2` (long root) and :math:`d_1 = 1` (short root),
+reflecting the fact that :math:`B_2` has roots of two different lengths.
+
+**Summary.** The Cartan matrix :math:`C = 2I - A^T` is not an arbitrary
+definition. It is the unique inner product (for simply-laced types) or the
+generator of the unique symmetrized inner product (for non-simply-laced types)
+that makes every mutation a symmetry. It emerges inevitably from asking:
+*what do the mutations preserve?*
+
 The Cartan matrix and finite-type classification
 -------------------------------------------------
 
-The **Cartan matrix** of the graph is:
+Having motivated the Cartan matrix, we can state its role in classification.
+For simply-laced types, the Cartan matrix is:
 
 .. math::
 
    C = 2I - A
 
-The type of the root system is determined entirely by the spectrum of *C*:
+For directed multigraphs (non-simply-laced types), it is :math:`C = 2I - A^T`.
+
+The type of the root system is determined entirely by the spectrum of the
+(symmetrized) Cartan form:
 
 - **Positive definite** (all eigenvalues :math:`> 0`): the root system is
   **finite**. This happens exactly for the ADE Dynkin diagrams.
