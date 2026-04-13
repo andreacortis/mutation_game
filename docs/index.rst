@@ -20,6 +20,7 @@ mutations and visualizes the mutation graph.
    :caption: The Mathematics
 
    background
+   weyl_groups
    platonic_solids
    singularities
    classification_proof
